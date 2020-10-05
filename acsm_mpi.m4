@@ -24,10 +24,11 @@ AS_IF(
                 ])
     AC_LANG_POP([C++])
   ],
-  [test -n "$MPI"],
+  [test -n "$MPI_LIBS_PATH" -a -n "$MPI_INCLUDES_PATH"],
   [
-    MPI_LIBS_PATH="$MPI/lib"
-    MPI_INCLUDES_PATH="$MPI/include"
+    AS_ECHO(["note: Checking $MPI_LIBS_PATH and $MPI_INCLUDES_PATH for MPI"])
+    dnl Default MPI_LIBS_PATH="$MPI/lib"
+    dnl Default MPI_INCLUDES_PATH="$MPI/include"
 
     MPI_LIBS_TO_TEST=""
     AS_IF([test -e $MPI_LIBS_PATH/libmpi.a], [MPI_LIBS_TO_TEST="$MPI_LIBS_PATH/libmpi.a $MPI_LIBS_TO_TEST"])
@@ -38,7 +39,7 @@ AS_IF(
     dnl look for LAM or other MPI implementation
     AS_IF([test x"$MPI_LIBS_TO_TEST" != x],
           [
-            AS_ECHO(["note: testing $MPI_LIBS_PATH/libmpi(.a/.so)"])
+            AS_ECHO(["note: testing $MPI_LIBS_PATH/libmpi(.a/.so/.dylib)"])
 
             dnl Ensure the compiler finds the library...
             tmpLIBS=$LIBS
@@ -86,6 +87,9 @@ AS_IF(
 
             AC_LANG_RESTORE
             LIBS=$tmpLIBS
+          ],
+          [
+            AS_ECHO(["note: Could not find $MPI_LIBS_PATH/libmpi(.a/.so/.dylib)"])
           ])
 
     dnl have we not found an implementation yet?
