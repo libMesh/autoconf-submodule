@@ -42,6 +42,57 @@ AC_ARG_WITH([mpi],
                     ])
             ])
 
+
+AC_ARG_WITH([mpi],
+            AS_HELP_STRING([--with-mpi@<:@=DIR@:>@],
+                           [Prefix where MPI is installed (default is MPIHOME and then MPI_HOME)]),
+            [
+              dnl We have no way of knowing whether the user explicitly enabled mpi
+              dnl with --enable-mpi or whether it was set by default, so if the user
+              dnl specified --with-mpi=no or --without-mpi we're just going to tell them they've given
+              dnl competing options
+              AS_IF([test "$enablempi" = yes && test "$withval" = no],
+                    [AC_MSG_ERROR([Did you mean to disable MPI? If you really mean it, use the --disable-mpi option instead])]
+                    )
+              MPI="$withval"
+            ],
+            [
+              AS_ECHO(["note: MPI library path not given..."])
+              AS_IF([test x"$MPIHOME" != x],
+                    [
+                      AS_ECHO(["trying prefix=$MPIHOME"])
+                      MPI=$MPIHOME
+                    ],
+                    [
+                      AS_IF([test x"$MPI_HOME" != x],
+                            [
+                              AS_ECHO(["trying prefix=$MPI_HOME"])
+                              MPI=$MPI_HOME
+                            ])
+                    ])
+            ])
+
+AC_ARG_WITH([mpi-include],
+            AS_HELP_STRING([--with-mpi-include@<:@=DIR@:>@],
+                           [Prefix where MPI headers are installed (default is --with-mpi+/include)]),
+            [
+              MPI_INCLUDES_PATH="$withval"
+            ],
+            [
+              MPI_INCLUDES_PATH="$MPI/include"
+            ])
+
+AC_ARG_WITH([mpi-lib],
+            AS_HELP_STRING([--with-mpi-lib@<:@=DIR@:>@],
+                           [Prefix where MPI binaries are installed (default is --with-mpi+/lib)]),
+            [
+              MPI_LIBS_PATH="$withval"
+            ],
+            [
+              MPI_LIBS_PATH="$MPI/lib"
+            ])
+
+#
 # --------------------------------------------------------------
 # Allow for disable-optional
 # --------------------------------------------------------------
