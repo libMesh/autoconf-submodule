@@ -9,10 +9,6 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
   dnl which occurs in ACSM_COMPILER_CONTROL_ARGS
   AC_REQUIRE([ACSM_COMPILER_CONTROL_ARGS])
 
-  # Trump --enable-petsc with --disable-mpi
-  AS_IF([test "x$enablempi" = xno],
-        [enablepetsc=no;enablepetsc_mpi=no])
-
   AC_ARG_VAR([PETSC_DIR],  [path to PETSc installation])
   AC_ARG_VAR([PETSC_ARCH], [PETSc build architecture])
 
