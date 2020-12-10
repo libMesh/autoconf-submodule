@@ -111,20 +111,26 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
   AS_IF([test "$enablepetsc" != no],
         [
           dnl Set some include and link variables by building and running temporary Makefiles.
+          dnl Some users may (perhaps foolishly) have an installed PETSc with
+          dnl configuration information from a system that is incompatible with ours.
+          dnl One potentially horrible compatibility is a SHELL=/usr/bin/sh variable
+          dnl definition in petscvariables when we do not have /usr/bin/sh. All
+          dnl nixes are supposed to have /bin/sh so it should be safe to set
+          dnl SHELL=/bin/sh always
           AS_IF([test "$PREFIX_INSTALLED_PETSC" = "no"],
                 [
-                  PETSCLINKLIBS=`make -s -C ${PETSC_DIR} getlinklibs`
-                  PETSCINCLUDEDIRS=`make -s -C ${PETSC_DIR} getincludedirs`
-                  PETSC_CXX=`make -s -C $PETSC_DIR getcxxcompiler`
-                  PETSC_MPI_INCLUDE_DIRS=`make -s -C $PETSC_DIR getmpiincludedirs`
-                  PETSC_MPI_LINK_LIBS=`make -s -C $PETSC_DIR getmpilinklibs`
+                  PETSCLINKLIBS=`make -s -C ${PETSC_DIR} SHELL=/bin/sh getlinklibs`
+                  PETSCINCLUDEDIRS=`make -s -C ${PETSC_DIR} SHELL=/bin/sh getincludedirs`
+                  PETSC_CXX=`make -s -C $PETSC_DIR SHELL=/bin/sh getcxxcompiler`
+                  PETSC_MPI_INCLUDE_DIRS=`make -s -C $PETSC_DIR SHELL=/bin/sh getmpiincludedirs`
+                  PETSC_MPI_LINK_LIBS=`make -s -C $PETSC_DIR SHELL=/bin/sh getmpilinklibs`
                   printf '%s\n' "include $PETSC_VARS_FILE" > Makefile_config_petsc
                   printf '%s\n' "getPETSC_CC_INCLUDES:" >> Makefile_config_petsc
                   printf '\t%s\n' "echo \$(PETSC_CC_INCLUDES)" >> Makefile_config_petsc
                   printf '%s\n' "getPETSC_FC_INCLUDES:" >> Makefile_config_petsc
                   printf '\t%s\n' "echo \$(PETSC_FC_INCLUDES)" >> Makefile_config_petsc
-                  PETSC_CC_INCLUDES=`make -s -f Makefile_config_petsc getPETSC_CC_INCLUDES`
-                  PETSC_FC_INCLUDES=`make -s -f Makefile_config_petsc getPETSC_FC_INCLUDES`
+                  PETSC_CC_INCLUDES=`make -s -f Makefile_config_petsc SHELL=/bin/sh getPETSC_CC_INCLUDES`
+                  PETSC_FC_INCLUDES=`make -s -f Makefile_config_petsc SHELL=/bin/sh getPETSC_FC_INCLUDES`
                   rm -f Makefile_config_petsc
                 ],
                 [
@@ -148,13 +154,13 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
                   printf '\t%s\n' "echo \$(MPI_INCLUDE)" >> Makefile_config_petsc
                   printf '%s\n' "getmpilinklibs:" >> Makefile_config_petsc
                   printf '\t%s\n' "echo \$(MPI_LIB)" >> Makefile_config_petsc
-                  PETSCLINKLIBS=`make -s -f Makefile_config_petsc getlinklibs`
-                  PETSCINCLUDEDIRS=`make -s -f Makefile_config_petsc getincludedirs`
-                  PETSC_CC_INCLUDES=`make -s -f Makefile_config_petsc getPETSC_CC_INCLUDES`
-                  PETSC_FC_INCLUDES=`make -s -f Makefile_config_petsc getPETSC_FC_INCLUDES`
-                  PETSC_CXX=`make -s -f Makefile_config_petsc getcxxcompiler`
-                  PETSC_MPI_INCLUDE_DIRS=`make -s -f Makefile_config_petsc getmpiincludedirs`
-                  PETSC_MPI_LINK_LIBS=`make -s -f Makefile_config_petsc getmpilinklibs`
+                  PETSCLINKLIBS=`make -s -f Makefile_config_petsc SHELL=/bin/sh getlinklibs`
+                  PETSCINCLUDEDIRS=`make -s -f Makefile_config_petsc SHELL=/bin/sh getincludedirs`
+                  PETSC_CC_INCLUDES=`make -s -f Makefile_config_petsc SHELL=/bin/sh getPETSC_CC_INCLUDES`
+                  PETSC_FC_INCLUDES=`make -s -f Makefile_config_petsc SHELL=/bin/sh getPETSC_FC_INCLUDES`
+                  PETSC_CXX=`make -s -f Makefile_config_petsc SHELL=/bin/sh getcxxcompiler`
+                  PETSC_MPI_INCLUDE_DIRS=`make -s -f Makefile_config_petsc SHELL=/bin/sh getmpiincludedirs`
+                  PETSC_MPI_LINK_LIBS=`make -s -f Makefile_config_petsc SHELL=/bin/sh getmpilinklibs`
                   rm -f Makefile_config_petsc
                 ]) dnl scrape petsc cxx, includes, and libs
 
