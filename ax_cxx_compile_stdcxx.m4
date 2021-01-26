@@ -35,13 +35,14 @@
 #   Copyright (c) 2015 Moritz Klammler <moritz@klammler.eu>
 #   Copyright (c) 2016, 2018 Krzesimir Nowak <qdlacz@gmail.com>
 #   Copyright (c) 2019 Enji Cooper <yaneurabeya@gmail.com>
+#   Copyright (c) 2021 Roy Stogner <Roy.Stogner@inl.gov>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
 #   and this notice are preserved.  This file is offered as-is, without any
 #   warranty.
 
-#serial 11
+#serial 12
 
 dnl  This macro is based on the code from the AX_CXX_COMPILE_STDCXX_11 macro
 dnl  (serial version number 13).
@@ -61,6 +62,14 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
         [m4_fatal([invalid third argument `$3' to AX_CXX_COMPILE_STDCXX])])
   AC_LANG_PUSH([C++])dnl
   ac_success=no
+
+  cachevar=AS_TR_SH([ax_cv_cxx_compile_cxx$1])
+  AC_CACHE_CHECK(whether $CXX supports C++$1 features by default,
+                 $cachevar,
+  [AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
+    [eval $cachevar=yes],
+    [eval $cachevar=no])])
+  AS_IF([eval test x\$$cachevar = xyes], [ac_success=yes])
 
   m4_if([$2], [noext], [], [dnl
   if test x$ac_success = xno; then
