@@ -1,6 +1,6 @@
 # SYNOPSIS
 #
-#   ACSM_CXX_COMPILER_STANDARD([MIN_VERSION], [MAX_VERSION])
+#   ACSM_CXX_COMPILER_STANDARD([MIN_VERSION], [MAX_VERSION], [ext|noext])
 #
 # DESCRIPTION
 #
@@ -16,6 +16,11 @@
 #
 #   Currently this macro is capable of searching for C++11, C++14,
 #   and/or C++17 support.
+#
+#   The third argument, if specified, indicates whether you insist on
+#   extended modes (e.g. -std=gnu++14) or strict conformance modes
+#   (e.g. -std=c++14).  If neither is specified, you get whatever
+#   works, with preference for an extended mode.
 #
 #   If necessary, add switches to CXX and CXXCPP to enable support for
 #   a detected standard.  If no acceptable standard is detected, error
@@ -39,6 +44,10 @@ m4_if([$1], [], [acsm_CXX_STD_MIN=2011])
 acsm_CXX_STD_MAX="$2"
 m4_if([$2], [], [acsm_CXX_STD_MAX=2017])
 
+m4_if([$3], [], [],
+      [$3], [ext], [],
+      [$3], [noext], [],
+      [m4_fatal([invalid third argument `$3' to ACSM_CXX_COMPILER_STANDARD])])dnl
 # --------------------------------------------------------------
 # How new a C++ standard should we ask for?
 # --------------------------------------------------------------
@@ -90,9 +99,9 @@ AS_IF([test "$acsm_found_cxx" = "0"],
   AS_IF([test 2017 -le "$acsm_CXX_STD_MAX"],
     [
     AS_IF([test 2017 -gt "$acsm_CXX_STD_MIN"],
-          [AX_CXX_COMPILE_STDCXX([17],[noext],[optional])],
+          [AX_CXX_COMPILE_STDCXX([17],[$3],[optional])],
           [AS_IF([test 2017 -eq "$acsm_CXX_STD_MIN"],
-                 [AX_CXX_COMPILE_STDCXX([17],[noext],[mandatory])])])
+                 [AX_CXX_COMPILE_STDCXX([17],[$3],[mandatory])])])
     AS_IF([test "$HAVE_CXX17" = "1"],
           [
            AC_MSG_NOTICE([Found C++17 standard support])
@@ -108,9 +117,9 @@ AS_IF([test "$acsm_found_cxx" = "0"],
   AS_IF([test 2014 -le "$acsm_CXX_STD_MAX"],
     [
     AS_IF([test 2014 -gt "$acsm_CXX_STD_MIN"],
-          [AX_CXX_COMPILE_STDCXX([14],[noext],[optional])],
+          [AX_CXX_COMPILE_STDCXX([14],[$3],[optional])],
           [AS_IF([test 2014 -eq "$acsm_CXX_STD_MIN"],
-                 [AX_CXX_COMPILE_STDCXX([14],[noext],[mandatory])])])
+                 [AX_CXX_COMPILE_STDCXX([14],[$3],[mandatory])])])
     AS_IF([test "$HAVE_CXX14" = "1"],
           [
            AC_MSG_NOTICE([Found C++14 standard support])
@@ -126,9 +135,9 @@ AS_IF([test "$acsm_found_cxx" = "0"],
   AS_IF([test 2011 -le "$acsm_CXX_STD_MAX"],
     [
     AS_IF([test 2011 -ge "$acsm_CXX_STD_MIN"],
-          [AX_CXX_COMPILE_STDCXX([11],[noext],[optional])],
+          [AX_CXX_COMPILE_STDCXX([11],[$3],[optional])],
           [AS_IF([test 2011 -eq "$acsm_CXX_STD_MIN"],
-                 [AX_CXX_COMPILE_STDCXX([11],[noext],[mandatory])])])
+                 [AX_CXX_COMPILE_STDCXX([11],[$3],[mandatory])])])
     AS_IF([test "$HAVE_CXX11" = "1"],
           [
            AC_MSG_NOTICE([Found C++11 standard support])
