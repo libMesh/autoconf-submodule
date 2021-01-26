@@ -11,6 +11,12 @@
 #   These defaults may be updated by --cxx-std-min, --cxx-std-max, or
 #   --cxx-std (to set both) options to configure.
 #
+#   Setting a MAX_VERSION below a compiler default standard does not
+#   currently override that standard.
+#
+#   Currently this macro is capable of searching for C++11, C++14,
+#   and/or C++17 support.
+#
 #   If necessary, add switches to CXX and CXXCPP to enable support for
 #   a detected standard.  If no acceptable standard is detected, error
 #   out.
@@ -26,13 +32,16 @@
 
 #serial 1
 
-AC_DEFUN([ACSM_COMPILER_STANDARD],
-[
+AC_DEFUN([ACSM_CXX_COMPILER_STANDARD], [dnl
+
+acsm_CXX_STD_MIN="$1"
+m4_if([$1], [], [acsm_CXX_STD_MIN=2011])
+acsm_CXX_STD_MAX="$2"
+m4_if([$2], [], [acsm_CXX_STD_MAX=2017])
 
 # --------------------------------------------------------------
 # How new a C++ standard should we ask for?
 # --------------------------------------------------------------
-acsm_CXX_STD_MAX="2099"
 AC_ARG_WITH([cxx-std-max],
             AS_HELP_STRING([--with-cxx-std-max@<:@=ARG@:>@],
                            [Maximum C++ standard year to request, 2011+; this does not override your compiler default]),
@@ -45,7 +54,6 @@ AC_ARG_WITH([cxx-std-max],
 # --------------------------------------------------------------
 # How new a C++ standard should we insist upon?
 # --------------------------------------------------------------
-acsm_CXX_STD_MIN="2011"
 AC_ARG_WITH([cxx-std-min],
             AS_HELP_STRING([--with-cxx-std-min@<:@=ARG@:>@],
                            [Minimum C++ standard year to require; default 2011]),
