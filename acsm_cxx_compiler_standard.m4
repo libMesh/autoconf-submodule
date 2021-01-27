@@ -105,6 +105,15 @@ AS_IF([test "$acsm_found_cxx" = "0"],
     AS_IF([test "$HAVE_CXX17" = "1"],
           [
            AC_MSG_NOTICE([Found C++17 standard support])
+
+           dnl For our purposes C++17 includes C++11 and C++14; there
+           dnl are more people relying on e.g. HAVE_CXX11 than there
+           dnl are relying on C++11 standards that have been removed
+           dnl from C++17
+           HAVE_CXX14=1
+           HAVE_CXX11=1
+           AC_SUBST(HAVE_CXX14)
+           AC_SUBST(HAVE_CXX11)
            acsm_found_cxx=1
            acsm_cxx_version=17],
           [AS_IF([test "$HAVE_CXX17" = "0"],
@@ -123,6 +132,11 @@ AS_IF([test "$acsm_found_cxx" = "0"],
     AS_IF([test "$HAVE_CXX14" = "1"],
           [
            AC_MSG_NOTICE([Found C++14 standard support])
+
+           dnl For our purposes C++14 includes C++11; there
+           dnl are people relying on HAVE_CXX11
+           HAVE_CXX11=1
+           AC_SUBST(HAVE_CXX11)
            acsm_found_cxx=1
            acsm_cxx_version=14],
           [AS_IF([test "$HAVE_CXX14" = "0"],
