@@ -94,73 +94,52 @@ AS_IF([test "$acsm_CXX_STD_MAX" -ge "$acsm_CXX_STD_MIN"],
 acsm_found_cxx=0
 acsm_cxx_version=0
 
-AS_IF([test "$acsm_found_cxx" = "0"],
-  [
+dnl We test for every standard in our range, so that later standards
+dnl still "count" as earlier standards too.
   AS_IF([test 2017 -le "$acsm_CXX_STD_MAX"],
     [
     AS_IF([test 2017 -gt "$acsm_CXX_STD_MIN"],
           [AX_CXX_COMPILE_STDCXX([17],[$3],[optional])],
-          [AS_IF([test 2017 -eq "$acsm_CXX_STD_MIN"],
-                 [AX_CXX_COMPILE_STDCXX([17],[$3],[mandatory])])])
+          [AX_CXX_COMPILE_STDCXX([17],[$3],[mandatory])])
     AS_IF([test "$HAVE_CXX17" = "1"],
           [
            AC_MSG_NOTICE([Found C++17 standard support])
-
-           dnl For our purposes C++17 includes C++11 and C++14; there
-           dnl are more people relying on e.g. HAVE_CXX11 than there
-           dnl are relying on C++11 standards that have been removed
-           dnl from C++17
-           HAVE_CXX14=1
-           HAVE_CXX11=1
-           AC_SUBST(HAVE_CXX14)
-           AC_SUBST(HAVE_CXX11)
-           acsm_found_cxx=1
-           acsm_cxx_version=17],
+           AS_IF([test $acsm_found_cxx -eq 0],
+                 [acsm_cxx_version=17])
+           acsm_found_cxx=1],
           [AS_IF([test "$HAVE_CXX17" = "0"],
            [AC_MSG_NOTICE([Did not find C++17 standard support])])])
     ])
-  ])
 
-AS_IF([test "$acsm_found_cxx" = "0"],
-  [
   AS_IF([test 2014 -le "$acsm_CXX_STD_MAX"],
     [
     AS_IF([test 2014 -gt "$acsm_CXX_STD_MIN"],
           [AX_CXX_COMPILE_STDCXX([14],[$3],[optional])],
-          [AS_IF([test 2014 -eq "$acsm_CXX_STD_MIN"],
-                 [AX_CXX_COMPILE_STDCXX([14],[$3],[mandatory])])])
+          [AX_CXX_COMPILE_STDCXX([14],[$3],[mandatory])])
     AS_IF([test "$HAVE_CXX14" = "1"],
           [
            AC_MSG_NOTICE([Found C++14 standard support])
-
-           dnl For our purposes C++14 includes C++11; there
-           dnl are people relying on HAVE_CXX11
-           HAVE_CXX11=1
-           AC_SUBST(HAVE_CXX11)
-           acsm_found_cxx=1
-           acsm_cxx_version=14],
+           AS_IF([test $acsm_found_cxx -eq 0],
+                 [acsm_cxx_version=14])
+           acsm_found_cxx=1],
           [AS_IF([test "$HAVE_CXX14" = "0"],
            [AC_MSG_NOTICE([Did not find C++14 standard support])])])
     ])
-  ])
 
-AS_IF([test "$acsm_found_cxx" = "0"],
-  [
   AS_IF([test 2011 -le "$acsm_CXX_STD_MAX"],
     [
-    AS_IF([test 2011 -ge "$acsm_CXX_STD_MIN"],
+    AS_IF([test 2011 -gt "$acsm_CXX_STD_MIN"],
           [AX_CXX_COMPILE_STDCXX([11],[$3],[optional])],
-          [AS_IF([test 2011 -eq "$acsm_CXX_STD_MIN"],
-                 [AX_CXX_COMPILE_STDCXX([11],[$3],[mandatory])])])
+          [AX_CXX_COMPILE_STDCXX([11],[$3],[mandatory])])
     AS_IF([test "$HAVE_CXX11" = "1"],
           [
            AC_MSG_NOTICE([Found C++11 standard support])
-           acsm_found_cxx=1
-           acsm_cxx_version=11],
+           AS_IF([test $acsm_found_cxx -eq 0],
+                 [acsm_cxx_version=11])
+           acsm_found_cxx=1],
           [AS_IF([test "$HAVE_CXX11" = "0"],
            [AC_MSG_NOTICE([Did not find C++11 standard support])])])
     ])
-  ])
 
 AS_IF([test "$acsm_found_cxx" = "1"],
       [AC_MSG_NOTICE([Using support for C++$acsm_cxx_version standard])],
