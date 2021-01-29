@@ -134,6 +134,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
   if test x$ac_success = xno; then
     HAVE_CXX$1=0
     AC_MSG_NOTICE([No compiler with C++$1 support was found])
+    switch=
   else
     HAVE_CXX$1=1
     AC_DEFINE(HAVE_CXX$1,1,
