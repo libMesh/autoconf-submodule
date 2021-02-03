@@ -99,6 +99,9 @@ AS_IF([test "$acsm_CXX_STD_MAX" -ge "$acsm_CXX_STD_MIN"],
 acsm_found_cxx=0
 acsm_cxx_version=0
 
+acsm_backup_CXX="$CXX"
+acsm_backup_CXXCPP="$CXXCPP"
+
 dnl We test for every standard in our range, so that later standards
 dnl still "count" as earlier standards too.
   AS_IF([test 2017 -le "$acsm_CXX_STD_MAX"],
@@ -114,8 +117,10 @@ dnl still "count" as earlier standards too.
            AS_IF([test $acsm_found_cxx -eq 0],
                  [acsm_cxx_version=17])
            acsm_found_cxx=1],
-          [AS_IF([test "$HAVE_CXX17" = "0"],
-           [AC_MSG_NOTICE([Did not find C++17 standard support])])])
+          [CXX="$acsm_backup_CXX"
+           CXXCPP="$acsm_backup_CXXCPP"
+           AS_IF([test "$HAVE_CXX17" = "0"],
+            [AC_MSG_NOTICE([Did not find C++17 standard support])])])
     ])
 
   AS_IF([test 2014 -le "$acsm_CXX_STD_MAX"],
@@ -131,8 +136,10 @@ dnl still "count" as earlier standards too.
            AS_IF([test $acsm_found_cxx -eq 0],
                  [acsm_cxx_version=14])
            acsm_found_cxx=1],
-          [AS_IF([test "$HAVE_CXX14" = "0"],
-           [AC_MSG_NOTICE([Did not find C++14 standard support])])])
+          [CXX="$acsm_backup_CXX"
+           CXXCPP="$acsm_backup_CXXCPP"
+           AS_IF([test "$HAVE_CXX14" = "0"],
+            [AC_MSG_NOTICE([Did not find C++14 standard support])])])
     ])
 
   AS_IF([test 2011 -le "$acsm_CXX_STD_MAX"],
@@ -148,8 +155,10 @@ dnl still "count" as earlier standards too.
            AS_IF([test $acsm_found_cxx -eq 0],
                  [acsm_cxx_version=11])
            acsm_found_cxx=1],
-          [AS_IF([test "$HAVE_CXX11" = "0"],
-           [AC_MSG_NOTICE([Did not find C++11 standard support])])])
+          [CXX="$acsm_backup_CXX"
+           CXXCPP="$acsm_backup_CXXCPP"
+           AS_IF([test "$HAVE_CXX11" = "0"],
+            [AC_MSG_NOTICE([Did not find C++11 standard support])])])
     ])
 
 AS_IF([test "$acsm_found_cxx" = "1"],
