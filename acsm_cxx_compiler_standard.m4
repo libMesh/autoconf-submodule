@@ -26,6 +26,11 @@
 #   a detected standard.  If no acceptable standard is detected, error
 #   out.
 #
+#   This macro makes "callbacks" to a user macro, ACSM_TEST_CXX_ALL,
+#   which can be used to add additional C++ required-feature tests.
+#   The user implementation of ACSM_TEST_CXX_ALL should set
+#   have_cxx_all=yes if no tests fail, or have_cxx_all=no otherwise.
+#
 # LICENSE
 #
 #   Copyright (c) 2021 Roy Stogner <Roy.Stogner@inl.gov>
@@ -101,7 +106,9 @@ dnl still "count" as earlier standards too.
     AS_IF([test 2017 -gt "$acsm_CXX_STD_MIN"],
           [AX_CXX_COMPILE_STDCXX([17],[$3],[optional])],
           [AX_CXX_COMPILE_STDCXX([17],[$3],[mandatory])])
-    AS_IF([test "$HAVE_CXX17" = "1"],
+    AS_IF([test "$HAVE_CXX17" = "1" -a $acsm_found_cxx -eq 0],
+           [ACSM_TEST_CXX_ALL])
+    AS_IF([test "$HAVE_CXX17" = "1" -a "x$have_cxx_all" = xyes],
           [
            AC_MSG_NOTICE([Found C++17 standard support])
            AS_IF([test $acsm_found_cxx -eq 0],
@@ -116,7 +123,9 @@ dnl still "count" as earlier standards too.
     AS_IF([test 2014 -gt "$acsm_CXX_STD_MIN"],
           [AX_CXX_COMPILE_STDCXX([14],[$3],[optional])],
           [AX_CXX_COMPILE_STDCXX([14],[$3],[mandatory])])
-    AS_IF([test "$HAVE_CXX14" = "1"],
+    AS_IF([test "$HAVE_CXX14" = "1" -a $acsm_found_cxx -eq 0],
+           [ACSM_TEST_CXX_ALL])
+    AS_IF([test "$HAVE_CXX14" = "1" -a "x$have_cxx_all" = xyes],
           [
            AC_MSG_NOTICE([Found C++14 standard support])
            AS_IF([test $acsm_found_cxx -eq 0],
@@ -131,7 +140,9 @@ dnl still "count" as earlier standards too.
     AS_IF([test 2011 -gt "$acsm_CXX_STD_MIN"],
           [AX_CXX_COMPILE_STDCXX([11],[$3],[optional])],
           [AX_CXX_COMPILE_STDCXX([11],[$3],[mandatory])])
-    AS_IF([test "$HAVE_CXX11" = "1"],
+    AS_IF([test "$HAVE_CXX11" = "1" -a $acsm_found_cxx -eq 0],
+           [ACSM_TEST_CXX_ALL])
+    AS_IF([test "$HAVE_CXX11" = "1" -a "x$have_cxx_all" = xyes],
           [
            AC_MSG_NOTICE([Found C++11 standard support])
            AS_IF([test $acsm_found_cxx -eq 0],
