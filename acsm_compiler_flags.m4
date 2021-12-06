@@ -304,17 +304,26 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
   # First the flags for gcc compilers
   AS_IF([test "$GXX" = "yes" && test "x$ACSM_REAL_GXX" != "x"],
         [
-          ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O2 -felide-constructors -funroll-loops -fstrict-aliasing -Wdisabled-optimization"
+          ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O2 -felide-constructors -fstrict-aliasing -Wdisabled-optimization"
           dnl devel flags are added on two lines since there are so many
           ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -O2 -felide-constructors -g -pedantic -W -Wall -Wextra -Wno-long-long -Wunused"
-          ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -Wpointer-arith -Wformat -Wparentheses -Wuninitialized -funroll-loops -fstrict-aliasing -Woverloaded-virtual -Wdisabled-optimization"
+          ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -Wpointer-arith -Wformat -Wparentheses -Wuninitialized -fstrict-aliasing -Woverloaded-virtual -Wdisabled-optimization"
           ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -O0 -felide-constructors -g -pedantic -W -Wall -Wextra -Wno-long-long -Wunused -Wpointer-arith -Wformat -Wparentheses -Woverloaded-virtual"
           ACSM_NODEPRECATEDFLAG="-Wno-deprecated"
 
-          ACSM_CFLAGS_OPT="-O2 -funroll-loops -fstrict-aliasing"
-          ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_OPT -g -Wimplicit -funroll-loops -fstrict-aliasing"
+          ACSM_CFLAGS_OPT="-O2 -fstrict-aliasing"
+          ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_OPT -g -Wimplicit -fstrict-aliasing"
           ACSM_CFLAGS_DBG="-g -Wimplicit"
           ACSM_ASSEMBLY_FLAGS="$ACSM_ASSEMBLY_FLAGS -fverbose-asm"
+
+          dnl Workaround for Ubuntu bug 1953401 (and likely other gcc 11 too)
+          AS_IF([test "x$ACSM_GXX_VERSION" != "xgcc11"],
+                [
+                  ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -funroll-loops"
+                  ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -funroll-loops"
+                  ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -funroll-loops"
+                  ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -funroll-loops"
+                ])
 
           dnl Tested on gcc 4.8.5; hopefully the other 4.8.x and all
           dnl later versions support these too:
