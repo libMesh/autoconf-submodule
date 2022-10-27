@@ -148,6 +148,18 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
                 ])
         ])
 
+  dnl Nvidia C++?
+  AS_IF([test "x$compiler_brand_detected" = "xno"],
+        [
+          is_nvcc="`($CXX -V 2>&1) | grep 'NVIDIA'`"
+          AS_IF([test "x$is_nvcc" != "x"],
+          [
+            AC_MSG_RESULT(<<< C++ compiler is NVIDIA C++ >>>)
+            ACSM_GXX_VERSION=nvidia
+            compiler_brand_detected=yes
+          ])
+        ])
+
   dnl Portland Group C++?
   AS_IF([test "x$compiler_brand_detected" = "xno"],
         [
