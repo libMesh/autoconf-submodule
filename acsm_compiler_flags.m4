@@ -148,6 +148,18 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
                 ])
         ])
 
+  dnl Nvidia C++?
+  AS_IF([test "x$compiler_brand_detected" = "xno"],
+        [
+          is_nvcc="`($CXX -V 2>&1) | grep 'NVIDIA'`"
+          AS_IF([test "x$is_nvcc" != "x"],
+          [
+            AC_MSG_RESULT(<<< C++ compiler is NVIDIA C++ >>>)
+            ACSM_GXX_VERSION=nvidia
+            compiler_brand_detected=yes
+          ])
+        ])
+
   dnl Portland Group C++?
   AS_IF([test "x$compiler_brand_detected" = "xno"],
         [
@@ -424,6 +436,44 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                   ],
                                   [AC_MSG_RESULT(Unknown Intel compiler, "$ACSM_GXX_VERSION")])
                        ],
+
+            [nvidia], [
+                          dnl Disable some warning messages on NVIDIA compilers:
+                          dnl 11:   unrecognized preprocessing directive
+                          dnl       "#warning".  It doesn't recognize "#warning".
+                          dnl 111:  statement is unreachable
+                          dnl       We have a ton of return-statement-after-error-thrown code
+                          dnl       specifically to keep *other* compilers' warnings happy
+                          dnl 177:  declared but never referenced
+                          dnl       This hurts to disable, but NVIDIA doesn't understand RAII!  It
+                          dnl       complains about scoped locks!  About factory patterns!
+                          dnl       Need to suppress this after -Wunused or that overrides it.
+                          dnl 445:  template parameter "Scalar1" is not used in declaring the
+                          dnl       parameter types of function template
+                          dnl       This warning was generated from one of the type_vector.h
+                          dnl       constructors that uses some SFINAE tricks.
+                          dnl 1676: unrecognized GCC pragma
+                          dnl       petscconf_poison.h screams about this
+
+                          dnl --display_error_number is really useful when we need a pragma to disable
+                          dnl a newly-cropped-up overzealous error...
+                                ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -O0 --display_error_number -g -pedantic -Wno-long-long -Wunused -Wuninitialized --diag_suppress=11,111,177,445,1676"
+                                ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -O2 --display_error_number -g -pedantic -Wno-long-long -Wunused -Wuninitialized --diag_suppress=11,111,177,445,1676"
+                                ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O2 --display_error_number --diag_suppress=11,111,177,445,1676"
+
+                                ACSM_NODEPRECATEDFLAG="-Wno-deprecated-declarations"
+
+                                ACSM_CFLAGS_DBG="$ACSM_CFLAGS_DBG -O0 -g"
+                                ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -O2 -g"
+                                ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -O2"
+
+                                dnl Disable exception handling if we dont use it
+                                AS_IF([test "$enableexceptions" = no],
+                                      [
+                                        ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG --no_exceptions"
+                                        ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT --no_exceptions"
+                                      ])
+                              ],
 
             [portland_group], [
                                 ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -g --no_using_std"
