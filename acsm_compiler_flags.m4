@@ -327,7 +327,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
 
           ACSM_CFLAGS_OPT="-O2 -fstrict-aliasing"
           ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_OPT -g -Wimplicit -fstrict-aliasing"
-          ACSM_CFLAGS_DBG="-g -Wimplicit"
+          ACSM_CFLAGS_DBG="-O0 -g -Wimplicit"
           ACSM_ASSEMBLY_FLAGS="$ACSM_ASSEMBLY_FLAGS -fverbose-asm"
 
           dnl Workaround for Ubuntu bug 1953401 (and likely other gcc 11 too)
@@ -545,6 +545,19 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
   ])
 ])
 
+
+# -------------------------------------------------------------
+# Set compiler flags to their default values. They will be
+# modified according to other options in later steps of
+# configuration.
+#
+# This just calls ACSM_SET_CXX_FLAGS, but from a more accurate name;
+# here we also set C compiler flags, cpp flags, and the rpath flag for
+# linkers.
+AC_DEFUN([ACSM_SET_BUILD_FLAGS],
+[
+  ACSM_SET_CXX_FLAGS
+])
 
 
 AC_DEFUN([ACSM_SET_GLIBCXX_DEBUG_FLAGS],
