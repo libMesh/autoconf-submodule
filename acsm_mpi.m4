@@ -11,8 +11,8 @@ AS_IF(
   [test x"$MPI_USING_WRAPPERS" = x1],
   [
     AC_LANG_PUSH([C++])
-    AC_TRY_LINK([@%:@include <mpi.h>],
-                [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);],
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([@%:@include <mpi.h>],
+                [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);])],
                 [
                   enablempi=yes
                   MPI_IMPL="mpi-wrapper-built-in"
@@ -44,7 +44,7 @@ AS_IF(
             dnl Ensure the compiler finds the library...
             tmpLIBS=$LIBS
             AC_LANG_SAVE
-            AC_LANG_CPLUSPLUS
+            AC_LANG([C++])
 
             LIBS="-L$MPI_LIBS_PATH $LIBS"
 
@@ -102,7 +102,7 @@ AS_IF(
                     dnl Ensure the compiler finds the library...
                     tmpLIBS=$LIBS
                     AC_LANG_SAVE
-                    AC_LANG_CPLUSPLUS
+                    AC_LANG([C++])
                     LIBS="-L$MPI_LIBS_PATH $LIBS"
 
                     dnl Myricomm MPICH requires the gm library to be included too
@@ -173,7 +173,7 @@ AS_IF(
                     AS_ECHO(["note: using $MPI_INCLUDES_PATH/mpi.h"])
                     tmpCPPFLAGS=$CPPFLAGS
                     AC_LANG_SAVE
-                    AC_LANG_CPLUSPLUS
+                    AC_LANG([C++])
                     CPPFLAGS="-I$MPI_INCLUDES_PATH $CPPFLAGS"
                     AC_CHECK_HEADER([mpi.h],
                                     [
@@ -191,7 +191,7 @@ AS_IF(
                     AS_ECHO(["note: using $MPI_INCLUDES_PATH/mpi.h"])
                     tmpCPPFLAGS=$CPPFLAGS
                     AC_LANG_SAVE
-                    AC_LANG_CPLUSPLUS
+                    AC_LANG([C++])
                     CPPFLAGS="-I$MPI_INCLUDES_PATH $CPPFLAGS"
                     AC_CHECK_HEADER([mpi.h],
                                     [
@@ -212,9 +212,9 @@ AS_IF(
             dnl no MPI install found, see if the compiler "natively" supports it by
             dnl attempting to link a test application without any special flags.
             AC_LANG_SAVE
-            AC_LANG_CPLUSPLUS
-            AC_TRY_LINK([@%:@include <mpi.h>],
-                        [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);],
+            AC_LANG([C++])
+            AC_LINK_IFELSE([AC_LANG_PROGRAM([@%:@include <mpi.h>],
+                        [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);])],
                         [
                            MPI_IMPL="CXX-built-in"
                            AC_MSG_RESULT( [$CXX Compiler Supports MPI] )
@@ -234,8 +234,8 @@ AS_IF(
     AC_LANG_PUSH([C++])
     LIBS="$PETSC_MPI_LINK_LIBS $LIBS"
     CPPFLAGS="$PETSC_MPI_INCLUDE_DIRS $CPPFLAGS"
-    AC_TRY_LINK([@%:@include <mpi.h>],
-                [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);],
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([@%:@include <mpi.h>],
+                [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);])],
                 [
                   enablempi=yes
                   MPI_IMPL="petsc"
@@ -255,9 +255,9 @@ AS_IF(
   dnl get any MPI info from a PETSc install. Let's check to see if CXX natively supports MPI
   [
     AC_LANG_SAVE
-    AC_LANG_CPLUSPLUS
-    AC_TRY_LINK([@%:@include <mpi.h>],
-                [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);],
+    AC_LANG([C++])
+    AC_LINK_IFELSE([AC_LANG_PROGRAM([@%:@include <mpi.h>],
+                [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);])],
                 [
                    MPI_IMPL="CXX-built-in"
                    AC_MSG_RESULT( [$CXX Compiler Supports MPI] )
