@@ -14,7 +14,7 @@ AC_DEFUN([ACSM_ENABLE_PARANOID],
   # (for library code only, not contrib or external code) by configuring
   # with --enable-paranoid-warnings
   AC_ARG_ENABLE(paranoid-warnings,
-                AC_HELP_STRING([--enable-paranoid-warnings],
+                AS_HELP_STRING([--enable-paranoid-warnings],
                                [Turn on paranoid compiler warnings]),
                 [AS_CASE("${enableval}",
                          [yes], [acsm_enableparanoid=yes],

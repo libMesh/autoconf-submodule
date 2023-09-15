@@ -13,7 +13,7 @@ AC_DEFUN([ACSM_ENABLE_WERROR],
   # into errors (for library code only, not contrib or external code)
   # by configuring with --enable-werror
   AC_ARG_ENABLE(werror,
-                AC_HELP_STRING([--enable-werror],
+                AS_HELP_STRING([--enable-werror],
                                [Turn compilation warnings into errors]),
                 [AS_CASE("${enableval}",
                          [yes], [acsm_enablewerror=yes],
