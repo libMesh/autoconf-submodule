@@ -201,6 +201,7 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
 # ACSM_CPPFLAGS_DBG    : preprocessor flags for debug mode
 #
 # ACSM_ASSEMBLY_FLAGS  : flag(s) to enable assembly language output
+# ACSM_FPE_SAFETY_FLAGS: flag(s) to disable FPE-emitting optimizations
 # ACSM_NODEPRECATEDFLAG: flag(s) to turn off deprecated code warnings
 # ACSM_OPROFILE_FLAGS  : flag(s) to enable profiling with oprof/perf
 # ACSM_PARANOID_FLAGS  : flags to turn on many more compiler warnings
@@ -250,6 +251,24 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
   # -fno-omit-frame-pointer flag turns off an optimization that
   # interferes with OProfile callgraphs
   ACSM_OPROFILE_FLAGS="-g -fno-omit-frame-pointer"
+
+  # Turning on floating-point exceptions is technically undefined
+  # behavior, and optimizers are starting to take advantage of that.
+  # See e.g. LLVM github issue #71492: "Whether your source code
+  # contains operations that produce a division by zero is irrelevant,
+  # as they may be legally introduced by the compiler." So if we might
+  # want to be able to trigger SIGFPE without false positives, we need
+  # to use compiler flags that enable that.
+  #
+  # Those are likely to vary from compiler to compiler, because "just
+  # never let the optimizer cause a floating-point exception" used to
+  # be a popular enough strategy that you didn't need a compiler
+  # flag.  The gcc manual for -fno-trapping-math still says "This
+  # option should never be turned on by any -O option since it can
+  # result in incorrect output for programs which depend on an exact
+  # implementation of IEEE or ISO rules/specifications for math
+  # functions"...
+  ACSM_FPE_SAFETY_FLAGS=""
 
   # For compilers that support it (clang >= 3.5.0 and GCC >= 4.8) the
   # user can selectively enable "sanitize" flags for different METHODs
@@ -324,6 +343,9 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
           ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -Wpointer-arith -Wformat -Wparentheses -Wuninitialized -fstrict-aliasing -Woverloaded-virtual -Wdisabled-optimization"
           ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -O0 -felide-constructors -g -pedantic -W -Wall -Wextra -Wno-long-long -Wunused -Wpointer-arith -Wformat -Wparentheses -Woverloaded-virtual"
           ACSM_NODEPRECATEDFLAG="-Wno-deprecated"
+
+          dnl this is the default on current gcc but let's be safe
+          ACSM_FPE_SAFETY_FLAGS="-ftrapping-math"
 
           ACSM_CFLAGS_OPT="-O2 -fstrict-aliasing"
           ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_OPT -g -Wimplicit -fstrict-aliasing"
@@ -515,6 +537,16 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -Wunused-parameter -Wunused -Wpointer-arith -Wformat -Wparentheses -Qunused-arguments -Woverloaded-virtual -fno-limit-debug-info"
                        ACSM_NODEPRECATEDFLAG="-Wno-deprecated"
 
+                       dnl -ftrapping-math is only supported with
+                       dnl clang 10 and newer, but our clang version
+                       dnl testing isn't reliable enough to risk
+                       dnl omitting it on clang 15 and newer.
+                       dnl
+                       dnl Users of clang versions prior to 10 can
+                       dnl --disable-fpe-safety, or just realize
+                       dnl they're like 6 versions behind and upgrade.
+                       ACSM_FPE_SAFETY_FLAGS="-ftrapping-math"
+
                        dnl Tested on clang 3.4.2
                        ACSM_PARANOID_FLAGS="-Wall -Wextra -Wcast-align -Wdisabled-optimization -Wformat=2"
                        ACSM_PARANOID_FLAGS="$ACSM_PARANOID_FLAGS -Wformat-nonliteral -Wformat-security -Wformat-y2k"
@@ -557,6 +589,46 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
 AC_DEFUN([ACSM_SET_BUILD_FLAGS],
 [
   ACSM_SET_CXX_FLAGS
+])
+
+
+# -------------------------------------------------------------
+# Add FPE safety flags to compiler flags, unless requested not to by
+# the user.
+
+AC_DEFUN([ACSM_SET_FPE_SAFETY_FLAGS],
+[
+  AC_REQUIRE([ACSM_SET_CXX_FLAGS])
+
+  AC_ARG_ENABLE(fpe-safety,
+                [AS_HELP_STRING([--disable-fpe-safety],
+                                [remove FPE-trapping compiler flags])],
+                [AS_CASE("${enableval}",
+                         [yes], [acsm_enablefpesafety=yes],
+                         [no],  [acsm_enablefpesafety=no],
+                         [AC_MSG_ERROR(bad value ${enableval} for --enable-fpe-safety)])],
+                [acsm_enablefpesafety=yes])
+
+  AS_IF([test "$acsm_enablefpesafety" = "yes"],
+        [
+          AS_IF([test "x$ACSM_FPE_SAFETY_FLAGS" != "x"],
+                [
+                  AC_MSG_RESULT(<<< Adding $ACSM_FPE_SAFETY_FLAGS for FPE safety >>>)
+                ],
+                [
+                  AC_MSG_RESULT(<<< No flags found to use for FPE safety >>>)
+                ])
+          ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT $ACSM_FPE_SAFETY_FLAGS"
+          ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG $ACSM_FPE_SAFETY_FLAGS"
+          ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL $ACSM_FPE_SAFETY_FLAGS"
+
+          ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT $ACSM_FPE_SAFETY_FLAGS"
+          ACSM_CFLAGS_DBG="$ACSM_CFLAGS_DBG $ACSM_FPE_SAFETY_FLAGS"
+          ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL $ACSM_FPE_SAFETY_FLAGS"
+        ],
+        [
+          AC_MSG_RESULT(<<< Not enabling flags for FPE safety >>>)
+        ])
 ])
 
 
