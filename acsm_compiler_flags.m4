@@ -611,6 +611,28 @@ AC_DEFUN([ACSM_SET_FPE_SAFETY_FLAGS],
 
   AS_IF([test "$acsm_enablefpesafety" = "yes"],
         [
+          AC_LANG_PUSH([C])
+          ac_fpe_safety_save_CFLAGS="$CFLAGS"
+          CFLAGS="${CFLAGS} ${ACSM_FPE_SAFETY_FLAGS}"
+          AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],[],
+            [
+              AC_MSG_WARN([unable to compile C with FPE safety flag ($CC $ACSM_FPE_SAFETY_FLAGS)])
+              ACSM_FPE_SAFETY_FLAGS=""
+            ])
+          CFLAGS="$ac_fpe_safety_save_CFLAGS"
+          AC_LANG_POP([C])
+
+          AC_LANG_PUSH([C++])
+          ac_fpe_safety_save_CXXFLAGS="$CXXFLAGS"
+          CXXFLAGS="${CXXFLAGS} ${ACSM_FPE_SAFETY_FLAGS}"
+          AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],[],
+            [
+              AC_MSG_WARN([unable to compile C++ with FPE safety flag ($CXX $ACSM_FPE_SAFETY_FLAGS)])
+              ACSM_FPE_SAFETY_FLAGS=""
+            ])
+          CXXFLAGS="$ac_fpe_safety_save_CXXFLAGS"
+          AC_LANG_POP([C++])
+
           AS_IF([test "x$ACSM_FPE_SAFETY_FLAGS" != "x"],
                 [
                   AC_MSG_RESULT(<<< Adding $ACSM_FPE_SAFETY_FLAGS for FPE safety >>>)
