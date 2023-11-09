@@ -552,14 +552,17 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        ACSM_NODEPRECATEDFLAG="-Wno-deprecated"
 
                        dnl -ftrapping-math is only supported with
-                       dnl clang 10 and newer, but our clang version
-                       dnl testing isn't reliable enough to risk
-                       dnl omitting it on clang 15 and newer.
+                       dnl clang 10 and newer.
                        dnl
-                       dnl Users of clang versions prior to 10 can
-                       dnl --disable-fpe-safety, or just realize
-                       dnl they're like 6 versions behind and upgrade.
-                       ACSM_FPE_SAFETY_FLAGS="-ftrapping-math"
+                       dnl The warning we need to disable with it on
+                       dnl ARM Mac is only enabled with clang 12 and
+                       dnl newer
+                       AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -gt 10],
+                             [ACSM_FPE_SAFETY_FLAGS="-ftrapping-math"],
+                             [ACSM_FPE_SAFETY_FLAGS=""])
+
+                       AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -gt 12],
+                             [ACSM_FPE_SAFETY_FLAGS="$ACSM_FPE_SAFETY_FLAGS -Wno-unsupported-floating-point-opt"])
 
                        dnl Tested on clang 3.4.2
                        ACSM_PARANOID_FLAGS="-Wall -Wextra -Wcast-align -Wdisabled-optimization -Wformat=2"
