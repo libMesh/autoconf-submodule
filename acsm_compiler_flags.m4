@@ -58,31 +58,45 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
   dnl Clang/LLVM C++?
   AS_IF([test "x$compiler_brand_detected" = "xno"],
         [
-          clang_version="`($CXX --version 2>&1)`"
-          is_clang="`echo $clang_version | grep 'clang'`"
+          ACSM_CLANG_VERSION_STRING="`($CXX --version 2>&1)`"
+          is_clang="`echo $ACSM_CLANG_VERSION_STRING | grep 'clang'`"
 
           AS_IF([test "x$is_clang" != "x"],
                 [
                   dnl Detect if clang is the version built by
                   dnl Apple, because then the version number means
                   dnl something different...
-                  is_apple_clang="`echo $clang_version | grep 'Apple'`"
+                  is_apple_clang="`echo $ACSM_CLANG_VERSION_STRING | grep 'Apple'`"
                   clang_vendor="clang"
                   AS_IF([test "x$is_apple_clang" != "x"],
                         [clang_vendor="Apple clang"])
 
-                  dnl If we have perl, we can also pull out the clang version number using regexes.
-                  dnl Note that @S|@ is a quadrigraph for the dollar sign.
-                  clang_major_minor=unknown
+                  AS_CASE("x$ACSM_CLANG_VERSION_STRING",
+                          [*clang\ version\ 17.*], [AC_MSG_RESULT(<<< C++ compiler is clang-17.x >>>)
+                                                    ACSM_CLANG_VERSION=17],
+                          [*clang\ version\ 16.*], [AC_MSG_RESULT(<<< C++ compiler is clang-16.x >>>)
+                                                    ACSM_CLANG_VERSION=16],
+                          [*clang\ version\ 15.*], [AC_MSG_RESULT(<<< C++ compiler is clang-15.x >>>)
+                                                    ACSM_CLANG_VERSION=15],
+                          [*clang\ version\ 14.*], [AC_MSG_RESULT(<<< C++ compiler is clang-14.x >>>)
+                                                    ACSM_CLANG_VERSION=14],
+                          [*clang\ version\ 13.*], [AC_MSG_RESULT(<<< C++ compiler is clang-13.x >>>)
+                                                    ACSM_CLANG_VERSION=13],
+                          [*clang\ version\ 12.*], [AC_MSG_RESULT(<<< C++ compiler is clang-12.x >>>)
+                                                    ACSM_CLANG_VERSION=12],
+                          [*clang\ version\ 11.*], [AC_MSG_RESULT(<<< C++ compiler is clang-11.x >>>)
+                                                    ACSM_CLANG_VERSION=11],
+                          [*clang\ version\ 10.*], [AC_MSG_RESULT(<<< C++ compiler is clang-10.x >>>)
+                                                    ACSM_CLANG_VERSION=10],
+                          [*clang\ version\ 9.*], [AC_MSG_RESULT(<<< C++ compiler is clang-9.x >>>)
+                                                   ACSM_CLANG_VERSION=9],
+                          [*clang\ version\ 8.*], [AC_MSG_RESULT(<<< C++ compiler is clang-8.x >>>)
+                                                   ACSM_CLANG_VERSION=8],
+                          [*clang\ version\ 7.*], [AC_MSG_RESULT(<<< C++ compiler is clang-7.x >>>)
+                                                   ACSM_CLANG_VERSION=7],
+                          [AC_MSG_RESULT(<<< C++ compiler "$ACSM_CLANG_VERSION" is unknown but accepted clang version >>>)
+                           ACSM_CLANG_VERSION=other])
 
-                  AS_IF([test "x$PERL" != "x"],
-                        [
-                          clang_major_minor=`echo $clang_version | $PERL -ne 'print @S|@1 if /version\s(\d+\.\d+)/'`
-                          AS_IF([test "x$clang_major_minor" = "x"],
-                                [clang_major_minor=unknown])
-                        ])
-
-                  AC_MSG_RESULT([<<< C++ compiler is ${clang_vendor}, version ${clang_major_minor} >>>])
                   ACSM_GXX_VERSION=clang
                   compiler_brand_detected=yes
                 ])
@@ -538,14 +552,17 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        ACSM_NODEPRECATEDFLAG="-Wno-deprecated"
 
                        dnl -ftrapping-math is only supported with
-                       dnl clang 10 and newer, but our clang version
-                       dnl testing isn't reliable enough to risk
-                       dnl omitting it on clang 15 and newer.
+                       dnl clang 10 and newer.
                        dnl
-                       dnl Users of clang versions prior to 10 can
-                       dnl --disable-fpe-safety, or just realize
-                       dnl they're like 6 versions behind and upgrade.
-                       ACSM_FPE_SAFETY_FLAGS="-ftrapping-math"
+                       dnl The warning we need to disable with it on
+                       dnl ARM Mac is only enabled with clang 12 and
+                       dnl newer
+                       AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -gt 10],
+                             [ACSM_FPE_SAFETY_FLAGS="-ftrapping-math"],
+                             [ACSM_FPE_SAFETY_FLAGS=""])
+
+                       AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -gt 12],
+                             [ACSM_FPE_SAFETY_FLAGS="$ACSM_FPE_SAFETY_FLAGS -Wno-unsupported-floating-point-opt"])
 
                        dnl Tested on clang 3.4.2
                        ACSM_PARANOID_FLAGS="-Wall -Wextra -Wcast-align -Wdisabled-optimization -Wformat=2"
