@@ -557,11 +557,11 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        dnl The warning we need to disable with it on
                        dnl ARM Mac is only enabled with clang 12 and
                        dnl newer
-                       AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -gt 10],
+                       AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -ge 10],
                              [ACSM_FPE_SAFETY_FLAGS="-ftrapping-math"],
                              [ACSM_FPE_SAFETY_FLAGS=""])
 
-                       AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -gt 12],
+                       AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -ge 12],
                              [ACSM_FPE_SAFETY_FLAGS="$ACSM_FPE_SAFETY_FLAGS -Wno-unsupported-floating-point-opt"])
 
                        dnl Tested on clang 3.4.2
