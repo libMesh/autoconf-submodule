@@ -68,6 +68,13 @@ AC_ARG_WITH([mpi],
                             [
                               AS_ECHO(["trying prefix=$MPI_HOME"])
                               MPI=$MPI_HOME
+                            ],
+                            [
+                              dnl With no wrappers or env vars,
+                              dnl /usr/include and /usr/lib are our
+                              dnl last chances
+                              AS_ECHO(["trying prefix=/usr"])
+                              MPI=/usr
                             ])
                     ])
             ])
