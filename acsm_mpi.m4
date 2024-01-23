@@ -221,7 +221,23 @@ AS_IF(
                            AC_DEFINE(HAVE_MPI, 1, [Flag indicating whether or not MPI is available])
                            enablempi=yes
                         ],
-                        [AC_MSG_RESULT([$CXX Compiler Does NOT Support MPI...]); enablempi=no])
+                        [AC_MSG_RESULT([$CXX compiler does not support MPI with no flags...]);
+                         tmpLIBS=$LIBS
+                         LIBS="-lmpi $LIBS"
+                         AC_LINK_IFELSE([AC_LANG_PROGRAM([@%:@include <mpi.h>],
+                                     [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);])],
+                                     [
+                                        MPI_IMPL="CXX-built-in"
+                                        AC_MSG_RESULT( [$CXX Compiler Supports MPI] )
+                                        AC_DEFINE(HAVE_MPI, 1, [Flag indicating whether or not MPI is available])
+                                        enablempi=yes
+                                     ],
+                                     [
+                                        AC_MSG_RESULT([$CXX compiler does NOT support MPI with attempted flags...]);
+                                         enablempi=no
+                                     ])
+                         LIBS=$tmpLIBS
+                        ])
             AC_LANG_RESTORE
           ])
   ],
@@ -264,7 +280,24 @@ AS_IF(
                    AC_DEFINE(HAVE_MPI, 1, [Flag indicating whether or not MPI is available])
                    enablempi=yes
                 ],
-                [AC_MSG_RESULT([$CXX Compiler Does NOT Support MPI...]); enablempi=no])
+                [AC_MSG_RESULT([$CXX compiler does not support MPI with no flags...]);
+                 tmpLIBS=$LIBS
+                 LIBS="-lmpi $LIBS"
+                 AC_LINK_IFELSE([AC_LANG_PROGRAM([@%:@include <mpi.h>],
+                                [int np; MPI_Comm_size (MPI_COMM_WORLD, &np);])],
+                                [
+                                   MPI_IMPL="CXX-built-in"
+                                   MPI_LIBS="-lmpi"
+                                   AC_MSG_RESULT( [$CXX compiler supports MPI with link flag] )
+                                   AC_DEFINE(HAVE_MPI, 1, [Flag indicating whether or not MPI is available])
+                                   enablempi=yes
+                                ],
+                                [
+                                   AC_MSG_RESULT( [$CXX compiler does NOT support MPI with attempted flags] )
+                                   enablempi=no
+                                ])
+                 LIBS=$tmpLIBS
+                ])
     AC_LANG_RESTORE
   ])
 
