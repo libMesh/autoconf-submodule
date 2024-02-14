@@ -28,14 +28,16 @@ AC_DEFUN([ACSM_ENABLE_PARANOID],
   AS_IF([test "x$acsm_enableparanoid" != "xyes"],
           [ACSM_ANY_PARANOID_FLAGS=''
            AC_MSG_RESULT(<<< Disabling extra paranoid compiler warnings >>>)],
-          [old_CXXFLAGS="$CXXFLAGS"
+          [AC_LANG_PUSH([C++])
+           old_CXXFLAGS="$CXXFLAGS"
            CXXFLAGS="$CXXFLAGS $WERROR_FLAGS $PARANOID_FLAGS"
            AC_COMPILE_IFELSE([AC_LANG_PROGRAM()],
             [AC_MSG_RESULT(<<< Enabled extra paranoid compiler warnings >>>)],
             [ACSM_ANY_PARANOID_FLAGS=''
              AC_MSG_RESULT(<<< Compiler may not support all of $PARANOID_FLAGS >>>)
              AC_MSG_RESULT(<<< Disabling extra paranoid compiler warnings >>>)])
-           CXXFLAGS="$old_CXXFLAGS"])
+           CXXFLAGS="$old_CXXFLAGS"
+           AC_LANG_POP([C++])])
   AC_SUBST(ACSM_ANY_PARANOID_FLAGS)
 ])
 
