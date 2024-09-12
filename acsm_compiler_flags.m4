@@ -499,6 +499,10 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
 
                                 ACSM_NODEPRECATEDFLAG="-Wno-deprecated-declarations"
 
+                                dnl Having to include -Mnovect is horrifying, but -Kieee alone still
+                                dnl gives me an FPE from pow(0,1) on NVidia HPC SDK 24.7
+                                ACSM_FPE_SAFETY_FLAGS="-Kieee -Mnovect"
+
                                 ACSM_CFLAGS_DBG="$ACSM_CFLAGS_DBG -O0 -g"
                                 ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -O2 -g"
                                 ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -O2"
