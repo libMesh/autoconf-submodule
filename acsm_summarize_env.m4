@@ -56,7 +56,12 @@ AC_DEFINE_UNQUOTED([BUILD_ARCH],     "${BUILD_ARCH}",     [Architecture of the b
 AC_DEFINE_UNQUOTED([BUILD_HOST],     "${BUILD_HOST}",     [Build host name])
 AC_DEFINE_UNQUOTED([BUILD_DEVSTATUS],"${BUILD_DEVSTATUS}",[Dev/Release build])
 AC_DEFINE(         [BUILD_DATE],     __DATE__ " " __TIME__, [Build date])
-AC_DEFINE(         [BUILD_VERSION],  "git",                 [Git revision])
+
+dnl TODO: Eventually we will not call AC_DEFINE (or AC_DEFINE_UNQUOTED) to
+dnl set the git hash in our config header but we can't immediately drop it
+dnl without having a deprecation period first, since codes based on
+dnl libMesh currently rely on LIBMESH_BUILD_VERSION being defined.
+AC_DEFINE_UNQUOTED([BUILD_VERSION],  "${BUILD_VERSION}",  [Git revision])
 
 AC_SUBST(BUILD_USER)
 AC_SUBST(BUILD_ARCH)
