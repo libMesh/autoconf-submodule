@@ -460,7 +460,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                           dnl       Well, duh, when the tested value is computed...  OK when it
                           dnl       was from an assignment.
                           AS_CASE("$ACSM_GXX_VERSION",
-                                  [intel_icc_v13.x | intel_icc_v14.x | intel_icc_v15.x | intel_icc_v16.x | intel_icc_v17.x | intel_icc_v18.x | intel_icc_v19.x | intel_icc_v20.x],
+                                  [intel_icc_v13.x | intel_icc_v14.x | intel_icc_v15.x | intel_icc_v16.x | intel_icc_v17.x | intel_icc_v18.x | intel_icc_v19.x | intel_icc_v20.x | intel_icc_v21.x],
                                   [
                                     ACSM_PROFILING_FLAGS="-p"
                                     ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -w1 -g -wd175 -wd1476 -wd1505 -wd1572 -wd488 -wd161"
@@ -470,7 +470,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                     ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -O3 -unroll -w0 -ftz"
                                     ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DBG"
                                   ],
-                                  [AC_MSG_RESULT(Unknown Intel compiler, "$ACSM_GXX_VERSION")])
+                                  [AC_MSG_RESULT(Unknown Intel compiler "$ACSM_GXX_VERSION")])
                        ],
 
             [nvidia], [
