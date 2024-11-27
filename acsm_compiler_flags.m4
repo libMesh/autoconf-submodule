@@ -102,10 +102,10 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
                 ])
         ])
 
-  dnl Intel's ICC C++ compiler?
+  dnl Intel's ICC/ICX C++ compiler?
   AS_IF([test "x$compiler_brand_detected" = "xno"],
         [
-          is_intel_icc="`($CXX -V 2>&1) | grep 'Intel(R)' | grep 'Compiler'`"
+          is_intel_icc="`($CXX -V 2>&1) | grep 'Intel(R)' | grep 'Compiler' | grep -v 'oneAPI'`"
           AS_IF([test "x$is_intel_icc" != "x"],
                 [
                   ACSM_GXX_VERSION_STRING="`($CXX -V 2>&1) | grep 'Version '`"
@@ -128,6 +128,25 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
                             ACSM_GXX_VERSION=intel_icc_v14.x],
                   [*13.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icc 13 >>>)
                             ACSM_GXX_VERSION=intel_icc_v13.x],
+                  [AC_MSG_ERROR(Unsupported Intel compiler detected)])
+                  compiler_brand_detected=yes
+                ])
+
+          is_intel_icx="`($CXX -V 2>&1) | grep 'Intel(R)' | grep 'Compiler' | grep 'oneAPI'`"
+          AS_IF([test "x$is_intel_icx" != "x"],
+                [
+                  ACSM_GXX_VERSION_STRING="`($CXX -V 2>&1) | grep 'Version '`"
+                  AS_CASE("$ACSM_GXX_VERSION_STRING",
+                  [*25.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icx 25 >>>)
+                            ACSM_GXX_VERSION=intel_icx_v25.x],
+                  [*24.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icx 24 >>>)
+                            ACSM_GXX_VERSION=intel_icx_v24.x],
+                  [*23.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icx 23 >>>)
+                            ACSM_GXX_VERSION=intel_icx_v23.x],
+                  [*22.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icx 22 >>>)
+                            ACSM_GXX_VERSION=intel_icx_v22.x],
+                  [*21.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icx 21 >>>)
+                            ACSM_GXX_VERSION=intel_icx_v21.x],
                   [AC_MSG_ERROR(Unsupported Intel compiler detected)])
                   compiler_brand_detected=yes
                 ])
@@ -460,7 +479,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                           dnl       Well, duh, when the tested value is computed...  OK when it
                           dnl       was from an assignment.
                           AS_CASE("$ACSM_GXX_VERSION",
-                                  [intel_icc_v13.x | intel_icc_v14.x | intel_icc_v15.x | intel_icc_v16.x | intel_icc_v17.x | intel_icc_v18.x | intel_icc_v19.x | intel_icc_v20.x],
+                                  [intel_icc_*],
                                   [
                                     ACSM_PROFILING_FLAGS="-p"
                                     ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -w1 -g -wd175 -wd1476 -wd1505 -wd1572 -wd488 -wd161"
@@ -470,7 +489,17 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                     ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -O3 -unroll -w0 -ftz"
                                     ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DBG"
                                   ],
-                                  [AC_MSG_RESULT(Unknown Intel compiler, "$ACSM_GXX_VERSION")])
+                                  [intel_icx_*],
+                                  [
+                                    ACSM_PROFILING_FLAGS=""
+                                    ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -O0 -g"
+                                    ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O3 -w0"
+                                    ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -O2 -g"
+                                    ACSM_CFLAGS_DBG="$ACSM_CFLAGS_DBG -O0 -g"
+                                    ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -O3 -w0"
+                                    ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -O2 -g"
+                                  ],
+                                  [AC_MSG_RESULT(Unknown Intel compiler "$ACSM_GXX_VERSION")])
                        ],
 
             [nvidia], [
