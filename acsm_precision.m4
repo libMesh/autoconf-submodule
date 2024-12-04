@@ -99,6 +99,4 @@ AS_IF([test "x$enablesingleprecision" != "xno"],
         enablerealprecision="double"
         AC_MSG_RESULT(<<< Default floating point is double precision (double) >>>)
       ])
-
-  AC_SUBST(acsm_precision_LIBS)
 ])
