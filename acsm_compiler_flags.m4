@@ -493,13 +493,23 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                   [
                                     ACSM_PROFILING_FLAGS=""
                                     ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -O0 -g"
-                                    ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O3 -w0"
+                                    ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O3"
                                     ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -O2 -g"
                                     ACSM_CFLAGS_DBG="$ACSM_CFLAGS_DBG -O0 -g"
-                                    ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -O3 -w0"
+                                    ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -O3"
                                     ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -O2 -g"
                                   ],
                                   [AC_MSG_RESULT(Unknown Intel compiler "$ACSM_GXX_VERSION")])
+                          dnl icx >= 24.x accepts -fopenmp but prefers -qopenmp, issuing a warning
+                          dnl with the former. The following causes compilation to fail with
+                          dnl -fopenmp at configuration time, thereby forcing -qopenmp.
+                          AS_CASE("$ACSM_GXX_VERSION",
+                                  [intel_icx_v21.x | intel_icx_v22.x | intel_icx_v23.x],
+                                  [],
+                                  [
+                                    CXXFLAGS="$CXXFLAGS -Werror=recommended-option"
+                                    CFLAGS="$CFLAGS -Werror=recommended-option"
+                                  ])
                        ],
 
             [nvidia], [
