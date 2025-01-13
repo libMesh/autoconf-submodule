@@ -585,6 +585,10 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        ],
 
             [clang], [
+                       dnl On Darwin with clang + gfortran, we get very many warnings for compact unwinding issues
+                       dnl We deliberately keep relying on the less performant dwarf unwinding until the over-production of warnings is solved.
+                       ACSM_LDFLAGS="-Wl,-keep_dwarf_unwind -Wl,-no_compact_unwind"
+
                        ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O2 -felide-constructors -Qunused-arguments -Wunused-parameter -Wunused"
                        dnl devel flags are added on two lines since there are so many
                        ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -O2 -felide-constructors -g -pedantic -W -Wall -Wextra -Wno-long-long"
