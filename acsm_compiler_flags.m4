@@ -585,24 +585,6 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        ],
 
             [clang], [
-                       dnl On Darwin with clang + gfortran, we get very many warnings for compact unwinding issues
-                       dnl We deliberately keep relying on the less performant dwarf unwinding until the over-production of warnings is solved.
-                       OLD_ACSM_LDFLAGS="$ACSM_LDFLAGS"
-                       ACSM_LDFLAGS+=" -Wl,-femit-dwarf-unwind=no_compact_unwind"
-                       AC_LINK_IFELSE([AC_LANG_SOURCE([[
-                           void main(int argc, char **argv)
-                           {
-                             std::cout << "Hello World!" << std::endl;
-                           }
-                       ]])],
-                        [
-                          AC_MSG_RESULT(<<<Disabling compact unwinding, retaining dwarf unwinding for gfortran compatibility>>>)
-                        ],[
-                          dnl Failed to link with new flags, remove them
-                          ACSM_LDFLAGS="$OLD_ACSM_LDFLAGS"
-                       ])
-
-
                        ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O2 -felide-constructors -Qunused-arguments -Wunused-parameter -Wunused"
                        dnl devel flags are added on two lines since there are so many
                        ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -O2 -felide-constructors -g -pedantic -W -Wall -Wextra -Wno-long-long"
@@ -611,6 +593,30 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -O0 -felide-constructors -g -pedantic -W -Wall -Wextra -Wno-long-long"
                        ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -Wunused-parameter -Wunused -Wpointer-arith -Wformat -Wparentheses -Qunused-arguments -Woverloaded-virtual -fno-limit-debug-info"
                        ACSM_NODEPRECATEDFLAG="-Wno-deprecated"
+
+                       dnl On Darwin with clang + gfortran, we get very many warnings for compact unwinding issues
+                       dnl We deliberately keep relying on the less performant dwarf unwinding until the over-production of warnings is solved.
+                       old_CXXFLAGS="$CXXFLAGS"
+                       CXXFLAGS="${CXXFLAGS} -femit-dwarf-unwind=always -Wl,-keep_dwarf_unwind -Wl,-no_compact_unwind "
+
+                       AC_LINK_IFELSE([
+                         AC_LANG_SOURCE(
+                           [[int main() { return 0; }]]
+                         )],[
+                          AC_MSG_RESULT(<<< Disabling compact unwinding and retaining dwarf unwinding for gfortran compatibility >>>)
+                          dnl Ideally we would be passing this as a fortran flag.
+                          ACSM_CXXFLAGS_OPT+=" -femit-dwarf-unwind=always -Wl,-keep_dwarf_unwind -Wl,-no_compact_unwind "
+                          ACSM_CXXFLAGS_DEVEL+=" -femit-dwarf-unwind=always -Wl,-keep_dwarf_unwind -Wl,-no_compact_unwind "
+                          ACSM_CXXFLAGS_DBG+=" -femit-dwarf-unwind=always -Wl,-keep_dwarf_unwind -Wl,-no_compact_unwind "
+                          ACSM_CFLAGS_OPT+=" -femit-dwarf-unwind=always -Wl,-keep_dwarf_unwind -Wl,-no_compact_unwind "
+                          dnl CFLAGS_OPT are copied into _DEVEL and _DBG
+                        ],[
+                          AC_MSG_RESULT(<<< Compact unwinding enabled >>>)
+                          dnl Failed to link with new flags, do not add them
+                       ])
+                       dnl Reset to old flags in case for any potential other test
+                       CXXFLAGS="$old_CXXFLAGS"
+                       AC_OUTPUT
 
                        dnl -ftrapping-math is only supported with
                        dnl clang 10 and newer.
@@ -635,9 +641,9 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        ACSM_PARANOID_FLAGS="$ACSM_PARANOID_FLAGS -Wunused-parameter -Wunused-value -Wvariadic-macros"
                        ACSM_PARANOID_FLAGS="$ACSM_PARANOID_FLAGS -Wvolatile-register-var -Wwrite-strings"
 
-                       ACSM_CFLAGS_OPT="-O2 -Qunused-arguments -Wunused"
-                       ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_OPT -g -Wimplicit -fno-limit-debug-info -Wunused"
-                       ACSM_CFLAGS_DBG="-g -Wimplicit -Qunused-arguments -fno-limit-debug-info -Wunused"
+                       ACSM_CFLAGS_OPT+="-O2 -Qunused-arguments -Wunused"
+                       ACSM_CFLAGS_DEVEL+="$ACSM_CFLAGS_OPT -g -Wimplicit -fno-limit-debug-info -Wunused"
+                       ACSM_CFLAGS_DBG+="-g -Wimplicit -Qunused-arguments -fno-limit-debug-info -Wunused"
                      ],
 
             dnl default case
