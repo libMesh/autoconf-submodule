@@ -15,7 +15,7 @@
 #
 # COPYLEFT
 #
-#   Copyright (c) 2012 Roy H. Stogner <roystgnr@ices.utexas.edu>
+#   Copyright (c) 2012-2025 Roy H. Stogner <Roy.Stogner@inl.gov>
 #   Copyright (c) 2010 Karl W. Schulz <karl@ices.utexas.edu>
 #
 #   Copying and distribution of this file, with or without modification, are
