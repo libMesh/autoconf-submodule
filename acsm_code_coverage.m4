@@ -31,8 +31,8 @@ HAVE_GCOV_TOOLS=0
 
 GCOV_FLAGS=""
 
-if test "x$enable_coverage" = "xyes"; then
-
+AS_IF([test "x$enable_coverage" = "xyes"],
+  [
    # ----------------------------
    # Check for gcov/lcov binaries
    # ----------------------------
@@ -135,8 +135,7 @@ if test "x$enable_coverage" = "xyes"; then
           AC_MSG_RESULT(yes)
          ],
          [AC_MSG_NOTICE([FC not set - skipping Fortran code coverage checks])])
-
-fi
+  ])
 
 AC_SUBST(GCOV_FLAGS)
 AC_SUBST(GCOV_LDFLAGS)
