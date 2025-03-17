@@ -15,7 +15,7 @@
 #
 # COPYLEFT
 #
-#   Copyright (c) 2012 Roy H. Stogner <roystgnr@ices.utexas.edu>
+#   Copyright (c) 2012-2025 Roy H. Stogner <Roy.Stogner@inl.gov>
 #   Copyright (c) 2010 Karl W. Schulz <karl@ices.utexas.edu>
 #
 #   Copying and distribution of this file, with or without modification, are
@@ -31,8 +31,8 @@ HAVE_GCOV_TOOLS=0
 
 GCOV_FLAGS=""
 
-if test "x$enable_coverage" = "xyes"; then
-
+AS_IF([test "x$enable_coverage" = "xyes"],
+  [
    # ----------------------------
    # Check for gcov/lcov binaries
    # ----------------------------
@@ -54,43 +54,88 @@ if test "x$enable_coverage" = "xyes"; then
 
    HAVE_GCOV_TOOLS=1
    GCOV_FLAGS="-fprofile-arcs -ftest-coverage --coverage"
-   GCOV_LDFLAGS="--coverage -lgcov"
+   GCOV_LDFLAGS="--coverage"
 
    ac_coverage_save_LDFLAGS="$LDFLAGS"
-   LDFLAGS="${LDFLAGS} ${GCOV_LDFLAGS}"
 
    # Test for C...
 
-   ac_coverage_save_CFLAGS="$CFLAGS"
+   AS_IF([test "x$CC" != "x"],
+         [AC_MSG_CHECKING([for C code coverage support])
+          ac_coverage_save_CFLAGS="$CFLAGS"
 
-   AC_LANG_PUSH([C])
-   CFLAGS="${GCOV_FLAGS} ${CFLAGS}"
-   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],[],
-     [AC_MSG_ERROR([unable to compile with code coverage ($CC --coverage)])])
-   AC_LANG_POP([C])
+          AC_LANG_PUSH([C])
+          CFLAGS="${GCOV_FLAGS} ${CFLAGS}"
+          AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],[],
+            [AC_MSG_ERROR([unable to compile C with code coverage ($CC --coverage)])])
+          LDFLAGS="${ac_coverage_save_LDFLAGS} ${GCOV_LDFLAGS}"
+          AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],[],
+            [
+             AC_MSG_NOTICE([unable to link C with coverage ($GCOV_LDFLAGS)])
+             GCOV_LDFLAGS="--coverage -lgcov"
+             LDFLAGS="${ac_coverage_save_LDFLAGS} ${GCOV_LDFLAGS}"
+             AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],[],
+               [AC_MSG_ERROR([also unable to link C with coverage ($GCOV_LDFLAGS)])])
+            ])
+          AC_LANG_POP([C])
+          AC_MSG_RESULT(yes)
+         ],
+         [AC_MSG_NOTICE([CC not set - skipping C code coverage checks])])
 
    # Test for C++...
 
-   ac_coverage_save_CXXFLAGS="$CXXFLAGS"
+   AS_IF([test "x$CXX" != "x"],
+         [AC_MSG_CHECKING([for C++ code coverage support])
+          ac_coverage_save_CXXFLAGS="$CXXFLAGS"
 
-   AC_LANG_PUSH([C++])
-   CXXFLAGS="${GCOV_FLAGS} ${CXXFLAGS}"
-   LIBS="-lgcov ${LIBS}"
-   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],[],
-     [AC_MSG_ERROR([unable to compile with code coverage ($CXX --coverage)])])
-   AC_LANG_POP([C++])
+          AC_LANG_PUSH([C++])
+          CXXFLAGS="${GCOV_FLAGS} ${CXXFLAGS}"
+          AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],[],
+            [AC_MSG_ERROR([unable to compile C++ with code coverage ($CXX --coverage)])])
+          LDFLAGS="${ac_coverage_save_LDFLAGS} ${GCOV_LDFLAGS}"
+          AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],[],
+            [
+             AS_IF([test "$GCOV_LDFLAGS" = "--coverage -lgcov"],
+                   [AC_MSG_ERROR([unable to link C++ with coverage ($GCOV_LDFLAGS)])],
+                   [AC_MSG_NOTICE([unable to link C++ with coverage ($GCOV_LDFLAGS)])
+                    GCOV_LDFLAGS="--coverage -lgcov"
+                    LDFLAGS="${ac_coverage_save_LDFLAGS} ${GCOV_LDFLAGS}"
+                    AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],[],
+                       [AC_MSG_ERROR([also unable to link C++ with coverage ($GCOV_LDFLAGS)])])
+                   ])
+            ])
+          AC_LANG_POP([C++])
+          AC_MSG_RESULT(yes)
+         ],
+         [AC_MSG_NOTICE([CXX not set - skipping C++ code coverage checks])])
 
    # Test for Fortran...
 
-   ac_coverage_save_FCFLAGS="$FCFLAGS"
+   AS_IF([test "x$FC" != "x"],
+         [AC_MSG_CHECKING([for Fortran code coverage support])
+          ac_coverage_save_FCFLAGS="$FCFLAGS"
 
-   AC_LANG_PUSH([Fortran])
-   FCFLAGS="${GCOV_FLAGS} ${FCFLAGS}"
-   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],[],
-     [AC_MSG_ERROR([unable to compile with code coverage ($FC --coverage)])])
-   AC_LANG_POP([Fortran])
-
-fi
+          AC_LANG_PUSH([Fortran])
+          FCFLAGS="${GCOV_FLAGS} ${FCFLAGS}"
+          AC_COMPILE_IFELSE([AC_LANG_PROGRAM([],[])],[],
+            [AC_MSG_ERROR([unable to compile Fortran with code coverage ($FC --coverage)])])
+          LDFLAGS="${ac_coverage_save_LDFLAGS} ${GCOV_LDFLAGS}"
+          AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],[],
+            [
+             AS_IF([test "$GCOV_LDFLAGS" = "--coverage -lgcov"],
+                   [AC_MSG_ERROR([unable to link Fortran with coverage ($GCOV_LDFLAGS)])],
+                   [AC_MSG_NOTICE([unable to link Fortran with coverage ($GCOV_LDFLAGS)])
+                    GCOV_LDFLAGS="--coverage -lgcov"
+                    LDFLAGS="${ac_coverage_save_LDFLAGS} ${GCOV_LDFLAGS}"
+                    AC_LINK_IFELSE([AC_LANG_PROGRAM([],[])],[],
+                       [AC_MSG_ERROR([also unable to link Fortran with coverage ($GCOV_LDFLAGS)])])
+                   ])
+            ])
+          AC_LANG_POP([Fortran])
+          AC_MSG_RESULT(yes)
+         ],
+         [AC_MSG_NOTICE([FC not set - skipping Fortran code coverage checks])])
+  ])
 
 AC_SUBST(GCOV_FLAGS)
 AC_SUBST(GCOV_LDFLAGS)
