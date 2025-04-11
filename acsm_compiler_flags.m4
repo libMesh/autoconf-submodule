@@ -72,6 +72,12 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
                         [clang_vendor="Apple clang"])
 
                   AS_CASE("x$ACSM_CLANG_VERSION_STRING",
+                          [*clang\ version\ 20.*], [AC_MSG_RESULT(<<< C++ compiler is clang-20.x >>>)
+                                                    ACSM_CLANG_VERSION=20],
+                          [*clang\ version\ 19.*], [AC_MSG_RESULT(<<< C++ compiler is clang-19.x >>>)
+                                                    ACSM_CLANG_VERSION=19],
+                          [*clang\ version\ 18.*], [AC_MSG_RESULT(<<< C++ compiler is clang-18.x >>>)
+                                                    ACSM_CLANG_VERSION=18],
                           [*clang\ version\ 17.*], [AC_MSG_RESULT(<<< C++ compiler is clang-17.x >>>)
                                                     ACSM_CLANG_VERSION=17],
                           [*clang\ version\ 16.*], [AC_MSG_RESULT(<<< C++ compiler is clang-16.x >>>)
@@ -620,6 +626,16 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        ACSM_CFLAGS_OPT="-O2 -Qunused-arguments -Wunused"
                        ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_OPT -g -Wimplicit -fno-limit-debug-info -Wunused"
                        ACSM_CFLAGS_DBG="-g -Wimplicit -Qunused-arguments -fno-limit-debug-info -Wunused"
+
+                       dnl This argument appears in clang 17 and
+                       dnl appears to become necessary to safely
+                       dnl dynamic_cast in later clang on OSX
+                       AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -ge 17],
+                             [
+                               ACSM_CXXFLAGS_OPT="$ACSM_CFLAGS_OPT -fno-assume-unique-vtables"
+                               ACSM_CXXFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -fno-assume-unique-vtables"
+                               ACSM_CXXFLAGS_DBG="$ACSM_CFLAGS_DBG -fno-assume-unique-vtables"
+                             ])
                      ],
 
             dnl default case
