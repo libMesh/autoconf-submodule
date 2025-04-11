@@ -632,9 +632,9 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        dnl dynamic_cast in later clang on OSX
                        AS_IF([test "x$ACSM_CLANG_VERSION" = "xother" || test $ACSM_CLANG_VERSION -ge 17],
                              [
-                               ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -fno-assume-unique-vtables"
-                               ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -fno-assume-unique-vtables"
-                               ACSM_CFLAGS_DBG="$ACSM_CFLAGS_DBG -fno-assume-unique-vtables"
+                               ACSM_CXXFLAGS_OPT="$ACSM_CFLAGS_OPT -fno-assume-unique-vtables"
+                               ACSM_CXXFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -fno-assume-unique-vtables"
+                               ACSM_CXXFLAGS_DBG="$ACSM_CFLAGS_DBG -fno-assume-unique-vtables"
                              ])
                      ],
 
