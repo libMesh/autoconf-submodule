@@ -72,6 +72,12 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
                         [clang_vendor="Apple clang"])
 
                   AS_CASE("x$ACSM_CLANG_VERSION_STRING",
+                          [*clang\ version\ 20.*], [AC_MSG_RESULT(<<< C++ compiler is clang-20.x >>>)
+                                                    ACSM_CLANG_VERSION=20],
+                          [*clang\ version\ 19.*], [AC_MSG_RESULT(<<< C++ compiler is clang-19.x >>>)
+                                                    ACSM_CLANG_VERSION=19],
+                          [*clang\ version\ 18.*], [AC_MSG_RESULT(<<< C++ compiler is clang-18.x >>>)
+                                                    ACSM_CLANG_VERSION=18],
                           [*clang\ version\ 17.*], [AC_MSG_RESULT(<<< C++ compiler is clang-17.x >>>)
                                                     ACSM_CLANG_VERSION=17],
                           [*clang\ version\ 16.*], [AC_MSG_RESULT(<<< C++ compiler is clang-16.x >>>)
