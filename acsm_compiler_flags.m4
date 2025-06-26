@@ -261,9 +261,9 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
   AC_REQUIRE([ACSM_DETERMINE_CXX_BRAND])
 
   # method-specific preprocessor flags, independent of compiler.
-  ACSM_CPPFLAGS_OPT="-DNDEBUG"
-  ACSM_CPPFLAGS_DBG="-DDEBUG"
-  ACSM_CPPFLAGS_DEVEL=""
+  ACSM_CPPFLAGS_OPT="$ACSM_CPPFLAGS_OPT -DNDEBUG"
+  ACSM_CPPFLAGS_DBG="$ACSM_CPPFLAGS_DBG -DDEBUG"
+  ACSM_CPPFLAGS_DEVEL="$ACSM_CPPFLAGS_DEVEL"
 
   # Flag to add directories to the dynamic library search path; can
   # be changed at a later stage
@@ -411,8 +411,9 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
           ACSM_PARANOID_FLAGS="$ACSM_PARANOID_FLAGS -Wunused-parameter -Wunused-value -Wvariadic-macros"
           ACSM_PARANOID_FLAGS="$ACSM_PARANOID_FLAGS -Wvolatile-register-var -Wwrite-strings"
 
-          AS_IF([test "x$enableglibcxxdebugging" = "xyes"],
-                [ACSM_CPPFLAGS_DBG="$ACSM_CPPFLAGS_DBG -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC"])
+          AS_IF([test "x$acsm_enableglibcxxdebugging" = "xyes"],
+                [AC_MSG_RESULT(<<< Adding GLIBCXX debugging flags >>>)
+                 ACSM_CPPFLAGS_DBG="$ACSM_CPPFLAGS_DBG -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC"])
 
           # GCC 4.6.3 warns about variadic macros but supports them just
           # fine, so let's turn off that warning.
@@ -636,6 +637,32 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                ACSM_CXXFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -fno-assume-unique-vtables"
                                ACSM_CXXFLAGS_DBG="$ACSM_CFLAGS_DBG -fno-assume-unique-vtables"
                              ])
+                       AS_IF([test "x$acsm_enableglibcxxdebugging" = "xyes"],
+                             [
+                              AC_LANG_PUSH([C++])
+                              AC_MSG_CHECKING([whether Clang is using libstdc++])
+                              AC_COMPILE_IFELSE(
+                                [AC_LANG_PROGRAM([[
+                                  #include <vector>
+                                  #ifndef __GLIBCXX__
+                                  #error Not using libstdc++
+                                  #endif
+                                ]])],
+                                [
+                                  AC_MSG_RESULT([yes])
+                                  clang_uses_libstdcpp=yes
+                                ],
+                                [
+                                  AC_MSG_RESULT([no])
+                                  clang_uses_libstdcpp=no
+                                ]
+                              )
+                              AC_LANG_POP([C++])
+                              AS_IF([test "x$clang_uses_libstdcpp" = "xyes"],
+                                    [AC_MSG_RESULT(<<< Adding GLIBCXX debugging flags >>>)
+                                     ACSM_CPPFLAGS_DBG="$ACSM_CPPFLAGS_DBG -D_GLIBCXX_DEBUG -D_GLIBCXX_DEBUG_PEDANTIC"])
+                             ])
+
                      ],
 
             dnl default case
