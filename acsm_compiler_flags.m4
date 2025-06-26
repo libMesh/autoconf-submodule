@@ -261,9 +261,9 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
   AC_REQUIRE([ACSM_DETERMINE_CXX_BRAND])
 
   # method-specific preprocessor flags, independent of compiler.
-  ACSM_CPPFLAGS_OPT="$ACSM_CPPFLAGS_OPT -DNDEBUG"
-  ACSM_CPPFLAGS_DBG="$ACSM_CPPFLAGS_DBG -DDEBUG"
-  ACSM_CPPFLAGS_DEVEL="$ACSM_CPPFLAGS_DEVEL"
+  ACSM_CPPFLAGS_OPT="-DNDEBUG"
+  ACSM_CPPFLAGS_DBG="-DDEBUG"
+  ACSM_CPPFLAGS_DEVEL=""
 
   # Flag to add directories to the dynamic library search path; can
   # be changed at a later stage
