@@ -56,7 +56,7 @@ AS_IF([test "x$enablesingleprecision" != "xno"],
         AC_MSG_CHECKING(whether we can build a trivial quad precision program)
 
         saveLIBS="$LIBS"
-        AS_IF([test "x$REAL_GXX" != "x"],
+        AS_IF([test "x$ACSM_REAL_GXX" != "x"],
               [acsm_precision_LIBS="-lquadmath"
                LIBS="$saveLIBS -lquadmath"
                AC_LINK_IFELSE([AC_LANG_SOURCE([[
