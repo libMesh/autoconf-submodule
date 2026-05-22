@@ -6,16 +6,13 @@
 #
 #   Check for baseline language coverage in the compiler for a
 #   version of the C++ standard in between the specified MIN_VERSION
-#   (which defaults to 2011) and MAX_VERSION (which defaults to 2017).
+#   (which defaults to 2011) and MAX_VERSION (which defaults to 2023).
 #
 #   These defaults may be updated by --cxx-std-min, --cxx-std-max, or
 #   --cxx-std (to set both) options to configure.
 #
 #   Setting a MAX_VERSION below a compiler default standard does not
 #   currently override that standard.
-#
-#   Currently this macro is capable of searching for C++11, C++14,
-#   and/or C++17 support.
 #
 #   The third argument, if specified, indicates whether you insist on
 #   extended modes (e.g. -std=gnu++14) or strict conformance modes
@@ -33,7 +30,7 @@
 #
 # LICENSE
 #
-#   Copyright (c) 2021 Roy Stogner <Roy.Stogner@inl.gov>
+#   Copyright (c) 2021-2026 Roy Stogner <Roy.Stogner@inl.gov>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
@@ -47,11 +44,12 @@ AC_DEFUN([ACSM_CXX_COMPILER_STANDARD], [dnl
 acsm_CXX_STD_MIN="$1"
 m4_if([$1], [], [acsm_CXX_STD_MIN=2011])
 acsm_CXX_STD_MAX="$2"
-m4_if([$2], [], [acsm_CXX_STD_MAX=2017])
+m4_if([$2], [], [acsm_CXX_STD_MAX=2023])
 
 m4_if([$3], [], [],
       [$3], [ext], [],
       [$3], [noext], [],
+      [$3], [defaultnoext], [],
       [m4_fatal([invalid third argument `$3' to ACSM_CXX_COMPILER_STANDARD])])dnl
 # --------------------------------------------------------------
 # How new a C++ standard should we ask for?
@@ -75,8 +73,8 @@ AC_ARG_WITH([cxx-std-min],
               AS_IF([test "$withval" -ge 2011],
                     [acsm_CXX_STD_MIN="$withval"],
                     [AC_MSG_ERROR(${withval} for --with-cxx-std-min must be an integer >= 2011)])
-              AS_IF([test "$withval" -gt 2017],
-                    [AC_MSG_ERROR(${withval} for --with-cxx-std-min must be an integer <= 2017)])
+              AS_IF([test "$withval" -gt 2023],
+                    [AC_MSG_ERROR(${withval} for --with-cxx-std-min must be an integer <= 2023)])
             ])
 
 # --------------------------------------------------------------
@@ -104,62 +102,28 @@ acsm_backup_CXXCPP="$CXXCPP"
 
 dnl We test for every standard in our range, so that later standards
 dnl still "count" as earlier standards too.
-  AS_IF([test 2017 -le "$acsm_CXX_STD_MAX"],
+m4_foreach_w([cxx_year], [23 20 17 14 11], [
+  CXX_YEAR=cxx_year
+  AS_IF([test "20$CXX_YEAR" -le "$acsm_CXX_STD_MAX" -a $acsm_found_cxx -eq 0],
     [
-    AS_IF([test 2017 -gt "$acsm_CXX_STD_MIN"],
-          [AX_CXX_COMPILE_STDCXX([17],[$3],[optional])],
-          [AX_CXX_COMPILE_STDCXX([17],[$3],[mandatory])])
-    AS_IF([test "$HAVE_CXX17" = "1" -a $acsm_found_cxx -eq 0],
+    AS_IF([test "20$CXX_YEAR" -gt "$acsm_CXX_STD_MIN"],
+          [AX_CXX_COMPILE_STDCXX(cxx_year,[$3],[optional])],
+          [AX_CXX_COMPILE_STDCXX(cxx_year,[$3],[mandatory])])
+    eval "HAVE_TESTED_CXX=\${HAVE_CXX$CXX_YEAR}"
+    AS_IF([test "$HAVE_TESTED_CXX" = "1" -a $acsm_found_cxx -eq 0],
            [ACSM_TEST_CXX_ALL])
-    AS_IF([test "$HAVE_CXX17" = "1" -a "x$have_cxx_all" = xyes],
+    AS_IF([test "$HAVE_TESTED_CXX" = "1" -a "x$have_cxx_all" = xyes],
           [
-           AC_MSG_NOTICE([Found C++17 standard support])
+           AC_MSG_NOTICE([Found C++$CXX_YEAR standard support])
            AS_IF([test $acsm_found_cxx -eq 0],
-                 [acsm_cxx_version=17])
+                 [acsm_cxx_version=$CXX_YEAR])
            acsm_found_cxx=1],
           [CXX="$acsm_backup_CXX"
            CXXCPP="$acsm_backup_CXXCPP"
            AS_IF([test "$HAVE_CXX17" = "0"],
-            [AC_MSG_NOTICE([Did not find C++17 standard support])])])
+            [AC_MSG_NOTICE([Did not find C++$CXX_YEAR standard support])])])
     ])
-
-  AS_IF([test 2014 -le "$acsm_CXX_STD_MAX"],
-    [
-    AS_IF([test 2014 -gt "$acsm_CXX_STD_MIN"],
-          [AX_CXX_COMPILE_STDCXX([14],[$3],[optional])],
-          [AX_CXX_COMPILE_STDCXX([14],[$3],[mandatory])])
-    AS_IF([test "$HAVE_CXX14" = "1" -a $acsm_found_cxx -eq 0],
-           [ACSM_TEST_CXX_ALL])
-    AS_IF([test "$HAVE_CXX14" = "1" -a "x$have_cxx_all" = xyes],
-          [
-           AC_MSG_NOTICE([Found C++14 standard support])
-           AS_IF([test $acsm_found_cxx -eq 0],
-                 [acsm_cxx_version=14])
-           acsm_found_cxx=1],
-          [CXX="$acsm_backup_CXX"
-           CXXCPP="$acsm_backup_CXXCPP"
-           AS_IF([test "$HAVE_CXX14" = "0"],
-            [AC_MSG_NOTICE([Did not find C++14 standard support])])])
-    ])
-
-  AS_IF([test 2011 -le "$acsm_CXX_STD_MAX"],
-    [
-    AS_IF([test 2011 -gt "$acsm_CXX_STD_MIN"],
-          [AX_CXX_COMPILE_STDCXX([11],[$3],[optional])],
-          [AX_CXX_COMPILE_STDCXX([11],[$3],[mandatory])])
-    AS_IF([test "$HAVE_CXX11" = "1" -a $acsm_found_cxx -eq 0],
-           [ACSM_TEST_CXX_ALL])
-    AS_IF([test "$HAVE_CXX11" = "1" -a "x$have_cxx_all" = xyes],
-          [
-           AC_MSG_NOTICE([Found C++11 standard support])
-           AS_IF([test $acsm_found_cxx -eq 0],
-                 [acsm_cxx_version=11])
-           acsm_found_cxx=1],
-          [CXX="$acsm_backup_CXX"
-           CXXCPP="$acsm_backup_CXXCPP"
-           AS_IF([test "$HAVE_CXX11" = "0"],
-            [AC_MSG_NOTICE([Did not find C++11 standard support])])])
-    ])
+])
 
 AS_IF([test "$acsm_found_cxx" = "1"],
       [AC_MSG_NOTICE([Using support for C++$acsm_cxx_version standard])],
