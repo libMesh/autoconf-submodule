@@ -38,13 +38,14 @@
 #   Copyright (c) 2020 Jason Merrill <jason@redhat.com>
 #   Copyright (c) 2021, 2024 Jörn Heusipp <osmanx@problemloesungsmaschine.de>
 #   Copyright (c) 2015, 2022, 2023, 2024 Olly Betts
+#   Copyright (c) 2026 Roy Stogner <Roy.Stogner@inl.gov>
 #
 #   Copying and distribution of this file, with or without modification, are
 #   permitted in any medium without royalty provided the copyright notice
 #   and this notice are preserved.  This file is offered as-is, without any
 #   warranty.
 
-#serial 25
+#serial 26
 
 dnl  This macro is based on the code from the AX_CXX_COMPILE_STDCXX_11 macro
 dnl  (serial version number 13).
@@ -67,17 +68,32 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
   AC_LANG_PUSH([C++])dnl
   ac_success=no
 
-  m4_if([$2], [], [dnl
-    AC_CACHE_CHECK(whether $CXX supports C++$1 features by default,
-		   ax_cv_cxx_compile_cxx$1,
-      [AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
-        [ax_cv_cxx_compile_cxx$1=yes],
-        [ax_cv_cxx_compile_cxx$1=no])])
-    if test x$ax_cv_cxx_compile_cxx$1 = xyes; then
-      ac_success=yes
-    fi])
+  m4_if([$2], [], [], [_AX_CXX_COMPILE_STDCXX_default_loop($1)])
 
-  m4_if([$2], [noext], [], [dnl
+  m4_if([$2], [noext], [], [_AX_CXX_COMPILE_STDCXX_ext_loop($1)])
+
+  m4_if([$2], [ext], [], [_AX_CXX_COMPILE_STDCXX_noext_loop($1)])
+
+  AC_LANG_POP([C++])
+  if test x$ax_cxx_compile_cxx$1_required = xtrue; then
+    if test x$ac_success = xno; then
+      AC_MSG_ERROR([*** A compiler with support for C++$1 language features is required.])
+    fi
+  fi
+  if test x$ac_success = xno; then
+    HAVE_CXX$1=0
+    AC_MSG_NOTICE([No compiler with C++$1 support was found])
+  else
+    HAVE_CXX$1=1
+    AC_DEFINE(HAVE_CXX$1,1,
+              [define if the compiler supports basic C++$1 syntax])
+  fi
+  AC_SUBST(HAVE_CXX$1)
+])
+
+
+dnl  Loop over possible GNU++ extension switches
+m4_define([_AX_CXX_COMPILE_STDCXX_ext_loop], [dnl
   if test x$ac_success = xno; then
     for alternative in ${ax_cxx_compile_alternatives}; do
       switch="-std=gnu++${alternative}"
@@ -101,7 +117,20 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
     done
   fi])
 
-  m4_if([$2], [ext], [], [dnl
+m4_define([_AX_CXX_COMPILE_STDCXX_default_loop], [dnl
+  if test x$ac_success = xno; then
+    AC_CACHE_CHECK(whether $CXX supports C++$1 features by default,
+                   ax_cv_cxx_compile_cxx$1,
+      [AC_COMPILE_IFELSE([AC_LANG_SOURCE([_AX_CXX_COMPILE_STDCXX_testbody_$1])],
+        [ax_cv_cxx_compile_cxx$1=yes],
+        [ax_cv_cxx_compile_cxx$1=no])])
+    if test x$ax_cv_cxx_compile_cxx$1 = xyes; then
+      ac_success=yes
+    fi
+  fi])
+
+
+m4_define([_AX_CXX_COMPILE_STDCXX_noext_loop], [dnl
   if test x$ac_success = xno; then
     dnl HP's aCC needs +std=c++11 according to:
     dnl http://h21007.www2.hp.com/portal/download/files/unprot/aCxx/PDF_Release_Notes/769149-001.pdf
@@ -140,22 +169,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
       fi
     done
   fi])
-  AC_LANG_POP([C++])
-  if test x$ax_cxx_compile_cxx$1_required = xtrue; then
-    if test x$ac_success = xno; then
-      AC_MSG_ERROR([*** A compiler with support for C++$1 language features is required.])
-    fi
-  fi
-  if test x$ac_success = xno; then
-    HAVE_CXX$1=0
-    AC_MSG_NOTICE([No compiler with C++$1 support was found])
-  else
-    HAVE_CXX$1=1
-    AC_DEFINE(HAVE_CXX$1,1,
-              [define if the compiler supports basic C++$1 syntax])
-  fi
-  AC_SUBST(HAVE_CXX$1)
-])
+
 
 
 dnl  Test body for checking C++11 support
