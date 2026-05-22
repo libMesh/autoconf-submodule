@@ -6,7 +6,7 @@
 #
 #   Check for baseline language coverage in the compiler for a
 #   version of the C++ standard in between the specified MIN_VERSION
-#   (which defaults to 2011) and MAX_VERSION (which defaults to 2026).
+#   (which defaults to 2011) and MAX_VERSION (which defaults to 2023).
 #
 #   These defaults may be updated by --cxx-std-min, --cxx-std-max, or
 #   --cxx-std (to set both) options to configure.
