@@ -49,6 +49,7 @@ m4_if([$2], [], [acsm_CXX_STD_MAX=2023])
 m4_if([$3], [], [],
       [$3], [ext], [],
       [$3], [noext], [],
+      [$3], [defaultnoext], [],
       [m4_fatal([invalid third argument `$3' to ACSM_CXX_COMPILER_STANDARD])])dnl
 # --------------------------------------------------------------
 # How new a C++ standard should we ask for?
