@@ -4,7 +4,7 @@
 #
 # SYNOPSIS
 #
-#   AX_CXX_COMPILE_STDCXX(VERSION, [ext|noext], [mandatory|optional])
+#   AX_CXX_COMPILE_STDCXX(VERSION, [ext|noext|defaultnoext], [mandatory|optional])
 #
 # DESCRIPTION
 #
@@ -14,9 +14,12 @@
 #   '23' for the respective C++ standard version.
 #
 #   The second argument, if specified, indicates whether you insist on an
-#   extended mode (e.g. -std=gnu++11) or a strict conformance mode (e.g.
-#   -std=c++11).  If neither is specified, you get whatever works, with
-#   preference for no added switch, and then for an extended mode.
+#   extended mode (e.g. -std=gnu++11), or a no-extensions strict
+#   conformance mode (e.g.  -std=c++11).  If neither is specified, you
+#   get whatever works, with preference for no added switch, and then
+#   for an extended mode.  If "defaultnoext" is specified, you get no
+#   added switch if that works, or you get a no-extensions switch if
+#   needed.
 #
 #   The third argument, if specified 'mandatory' or if left unspecified,
 #   indicates that baseline support for the specified C++ standard is
@@ -60,6 +63,7 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
   m4_if([$2], [], [],
         [$2], [ext], [],
         [$2], [noext], [],
+        [$2], [defaultnoext], [],
         [m4_fatal([invalid second argument `$2' to AX_CXX_COMPILE_STDCXX])])dnl
   m4_if([$3], [], [ax_cxx_compile_cxx$1_required=true],
         [$3], [mandatory], [ax_cxx_compile_cxx$1_required=true],
@@ -68,11 +72,21 @@ AC_DEFUN([AX_CXX_COMPILE_STDCXX], [dnl
   AC_LANG_PUSH([C++])dnl
   ac_success=no
 
-  m4_if([$2], [], [], [_AX_CXX_COMPILE_STDCXX_default_loop($1)])
+  dnl  Default "" argument or "defaultnoext" argument means we first
+  dnl  see if the compiler works as-is
+  m4_if([$2], [], [_AX_CXX_COMPILE_STDCXX_default_loop($1)])
+  m4_if([$2], [defaultnoext], [_AX_CXX_COMPILE_STDCXX_default_loop($1)])
 
-  m4_if([$2], [noext], [], [_AX_CXX_COMPILE_STDCXX_ext_loop($1)])
+  dnl  Default "" argument or "ext" argument means we try extended
+  dnl  switches
+  m4_if([$2], [], [_AX_CXX_COMPILE_STDCXX_ext_loop($1)])
+  m4_if([$2], [ext], [_AX_CXX_COMPILE_STDCXX_ext_loop($1)])
 
-  m4_if([$2], [ext], [], [_AX_CXX_COMPILE_STDCXX_noext_loop($1)])
+  dnl  Default "" argument or "noext" or "defaultnoext" argument means
+  dnl  we try non-extended switches
+  m4_if([$2], [], [_AX_CXX_COMPILE_STDCXX_noext_loop($1)])
+  m4_if([$2], [noext], [_AX_CXX_COMPILE_STDCXX_noext_loop($1)])
+  m4_if([$2], [defaultnoext], [_AX_CXX_COMPILE_STDCXX_noext_loop($1)])
 
   AC_LANG_POP([C++])
   if test x$ax_cxx_compile_cxx$1_required = xtrue; then
