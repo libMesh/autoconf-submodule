@@ -74,10 +74,22 @@ AC_DEFUN([CONFIGURE_KOKKOS],
                   [have_kokkos_openmp=yes],
                   [have_kokkos_openmp=no])])
 
+              dnl If we're using OpenMP, we probably want to add
+              dnl OpenMP flags if we can.  Some compilers don't accept the
+              dnl common flag, so we test first.
               AS_IF([test "x$have_kokkos_openmp" = "xyes"],
                 [
-                  KOKKOS_CXXFLAGS="$KOKKOS_CXXFLAGS -fopenmp"
-                  KOKKOS_LDFLAGS="$KOKKOS_LDFLAGS -fopenmp"
+                  AC_LANG_SAVE
+                  AC_LANG([C++])
+                  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([@%:@include <vector>],
+                    [
+                      std::vector<int> v;
+                      v.push_back(1);
+                    ])],
+                    [
+                      KOKKOS_CXXFLAGS="$KOKKOS_CXXFLAGS -fopenmp"
+                      KOKKOS_LDFLAGS="$KOKKOS_LDFLAGS -fopenmp"
+                    ])
                 ])
 
               AS_IF([test "x$KOKKOS_BACKEND" = "xauto"],
@@ -174,8 +186,7 @@ AC_DEFUN([CONFIGURE_KOKKOS],
                   ;;
                 openmp)
                   KOKKOS_CXX="${CXX}"
-                  KOKKOS_CXXFLAGS="-fopenmp -x c++"
-                  KOKKOS_LDFLAGS="-fopenmp $KOKKOS_LDFLAGS"
+                  KOKKOS_CXXFLAGS="-x c++ $KOKKOS_CXXFLAGS"
                   ;;
                 serial|*)
                   KOKKOS_CXX="${CXX}"
