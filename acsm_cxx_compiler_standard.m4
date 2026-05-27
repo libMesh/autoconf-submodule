@@ -120,7 +120,7 @@ m4_foreach_w([cxx_year], [23 20 17 14 11], [
            acsm_found_cxx=1],
           [CXX="$acsm_backup_CXX"
            CXXCPP="$acsm_backup_CXXCPP"
-           AS_IF([test "$HAVE_CXX17" = "0"],
+           AS_IF([test "$HAVE_CXX$CXX_YEAR" = "0"],
             [AC_MSG_NOTICE([Did not find C++$CXX_YEAR standard support])])])
     ])
 ])
