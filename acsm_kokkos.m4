@@ -317,6 +317,7 @@ AC_DEFUN([CONFIGURE_KOKKOS],
         dnl indistinguishable from other errors.
         [AC_MSG_ERROR([*** Kokkos was not found, but --enable-kokkos-required was specified.], 4)])
 
+  AC_SUBST([KOKKOS_BACKEND])
   AC_SUBST([KOKKOS_CXX])
   AC_SUBST([KOKKOS_CPPFLAGS])
   AC_SUBST([KOKKOS_CXXFLAGS])
