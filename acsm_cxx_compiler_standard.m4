@@ -121,7 +121,12 @@ m4_foreach_w([cxx_year], [23 20 17 14 11], [
                        CXXCPP="$acsm_backup_CXXCPP"
                        AS_IF([test "$HAVE_CXX$CXX_YEAR" = "0"],
                              [AC_MSG_NOTICE([Did not find C++$CXX_YEAR standard support])])])
-               ])
+               ],
+               dnl If we support a newer C++ standard, we basically support the older ones.
+               [eval "HAVE_CXX$CXX_YEAR=1"
+                AC_SUBST(HAVE_CXXcxx_year)
+               ]
+             )
         ])
 ])
 
