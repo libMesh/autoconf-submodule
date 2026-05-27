@@ -1,7 +1,7 @@
 dnl -------------------------------------------------------------
 dnl Kokkos -- optional, enables the native Kokkos FE math path
 dnl -------------------------------------------------------------
-AC_DEFUN([CONFIGURE_KOKKOS],
+AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
 [
   AC_ARG_VAR([KOKKOS_CXXFLAGS], [Extra C++ flags for compiling Kokkos sources])
 
