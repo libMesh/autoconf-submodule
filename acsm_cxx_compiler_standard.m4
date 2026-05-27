@@ -104,25 +104,25 @@ dnl We test for every standard in our range, so that later standards
 dnl still "count" as earlier standards too.
 m4_foreach_w([cxx_year], [23 20 17 14 11], [
   CXX_YEAR=cxx_year
-  AS_IF([test "20$CXX_YEAR" -le "$acsm_CXX_STD_MAX" -a $acsm_found_cxx -eq 0],
-    [
-    AS_IF([test "20$CXX_YEAR" -gt "$acsm_CXX_STD_MIN"],
-          [AX_CXX_COMPILE_STDCXX(cxx_year,[$3],[optional])],
-          [AX_CXX_COMPILE_STDCXX(cxx_year,[$3],[mandatory])])
-    eval "HAVE_TESTED_CXX=\${HAVE_CXX$CXX_YEAR}"
-    AS_IF([test "$HAVE_TESTED_CXX" = "1" -a $acsm_found_cxx -eq 0],
-           [ACSM_TEST_CXX_ALL])
-    AS_IF([test "$HAVE_TESTED_CXX" = "1" -a "x$have_cxx_all" = xyes],
-          [
-           AC_MSG_NOTICE([Found C++$CXX_YEAR standard support])
-           AS_IF([test $acsm_found_cxx -eq 0],
-                 [acsm_cxx_version=$CXX_YEAR])
-           acsm_found_cxx=1],
-          [CXX="$acsm_backup_CXX"
-           CXXCPP="$acsm_backup_CXXCPP"
-           AS_IF([test "$HAVE_CXX$CXX_YEAR" = "0"],
-            [AC_MSG_NOTICE([Did not find C++$CXX_YEAR standard support])])])
-    ])
+  AS_IF([test "20$CXX_YEAR" -le "$acsm_CXX_STD_MAX"],
+        [AS_IF([test $acsm_found_cxx -eq 0],
+               [AS_IF([test "20$CXX_YEAR" -gt "$acsm_CXX_STD_MIN"],
+                      [AX_CXX_COMPILE_STDCXX(cxx_year,[$3],[optional])],
+                      [AX_CXX_COMPILE_STDCXX(cxx_year,[$3],[mandatory])])
+                eval "HAVE_TESTED_CXX=\${HAVE_CXX$CXX_YEAR}"
+                AS_IF([test "$HAVE_TESTED_CXX" = "1" -a $acsm_found_cxx -eq 0],
+                      [ACSM_TEST_CXX_ALL])
+                AS_IF([test "$HAVE_TESTED_CXX" = "1" -a "x$have_cxx_all" = xyes],
+                      [AC_MSG_NOTICE([Found C++$CXX_YEAR standard support])
+                       AS_IF([test $acsm_found_cxx -eq 0],
+                             [acsm_cxx_version=$CXX_YEAR])
+                       acsm_found_cxx=1],
+                      [CXX="$acsm_backup_CXX"
+                       CXXCPP="$acsm_backup_CXXCPP"
+                       AS_IF([test "$HAVE_CXX$CXX_YEAR" = "0"],
+                             [AC_MSG_NOTICE([Did not find C++$CXX_YEAR standard support])])])
+               ])
+        ])
 ])
 
 AS_IF([test "$acsm_found_cxx" = "1"],
