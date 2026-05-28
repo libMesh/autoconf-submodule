@@ -74,24 +74,6 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
                   [have_kokkos_openmp=yes],
                   [have_kokkos_openmp=no])])
 
-              dnl If we're using OpenMP, we probably want to add
-              dnl OpenMP flags if we can.  Some compilers don't accept the
-              dnl common flag, so we test first.
-              AS_IF([test "x$have_kokkos_openmp" = "xyes"],
-                [
-                  AC_LANG_SAVE
-                  AC_LANG([C++])
-                  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([@%:@include <vector>],
-                    [
-                      std::vector<int> v;
-                      v.push_back(1);
-                    ])],
-                    [
-                      KOKKOS_CXXFLAGS="$KOKKOS_CXXFLAGS -fopenmp"
-                      KOKKOS_LDFLAGS="$KOKKOS_LDFLAGS -fopenmp"
-                    ])
-                ])
-
               AS_IF([test "x$KOKKOS_BACKEND" = "xauto"],
                 [
                   AS_IF([test -r "$KOKKOS_CFG"],
@@ -195,6 +177,37 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
               esac
             ],
             [AC_MSG_RESULT([Using caller-provided KOKKOS_CXX=$KOKKOS_CXX])])
+
+          dnl If we're using OpenMP, we probably want to add
+          dnl OpenMP flags if we can.  Some compilers don't accept the
+          dnl common flag, so we test first.
+          AS_IF([test "x$have_kokkos_openmp" = "xyes"],
+            [
+              AC_MSG_CHECKING([whether the Kokkos compiler supports -fopenmp])
+
+              acsm_save_CXX="$CXX"
+              acsm_save_CXXFLAGS="$CXXFLAGS"
+
+              CXX="$KOKKOS_CXX"
+              CXXFLAGS="$CXXFLAGS -fopenmp"
+              AC_LANG_PUSH([C++])
+
+              AC_COMPILE_IFELSE([AC_LANG_PROGRAM([@%:@include <vector>],
+                [
+                  std::vector<int> v;
+                  v.push_back(1);
+                ])],
+                [
+                  KOKKOS_CXXFLAGS="$KOKKOS_CXXFLAGS -fopenmp"
+                  KOKKOS_LDFLAGS="$KOKKOS_LDFLAGS -fopenmp"
+                  AC_MSG_RESULT([yes])
+                ],
+                [ AC_MSG_RESULT([no]) ]
+               )
+              CXXFLAGS="$acsm_save_CXXFLAGS"
+              CXX="$acsm_save_CXX"
+              AC_LANG_POP([C++])
+            ])
 
           dnl If KOKKOS_CXX differs from the main compiler, it may not be the MPI
           dnl wrapper and thus may need the wrapper's compile flags explicitly in
