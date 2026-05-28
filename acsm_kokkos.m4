@@ -117,7 +117,7 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
                   AS_IF([test "x$NVCC" = "xno"],
                     [AC_MSG_ERROR([nvcc not found but Kokkos CUDA backend requested])])
                   KOKKOS_CXX="$NVCC"
-                  KOKKOS_CXXFLAGS="--forward-unknown-to-host-compiler --extended-lambda --disable-warnings -x cu -ccbin $KOKKOS_CXXFLAGS"
+                  KOKKOS_CXXFLAGS="--forward-unknown-to-host-compiler -x cu $KOKKOS_CXXFLAGS"
                   KOKKOS_LDFLAGS="--forward-unknown-to-host-compiler $KOKKOS_LDFLAGS"
 
                   dnl
