@@ -124,7 +124,7 @@ m4_foreach_w([cxx_year], [23 20 17 14 11], [
                ],
                dnl If we support a newer C++ standard, we basically support the older ones.
                [eval "HAVE_CXX$CXX_YEAR=1"
-                AC_SUBST(HAVE_CXXcxx_year)
+                AC_SUBST([HAVE_CXX]cxx_year)
                ]
              )
         ])
