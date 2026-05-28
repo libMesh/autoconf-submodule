@@ -3,6 +3,9 @@ dnl Kokkos -- optional, enables the native Kokkos FE math path
 dnl -------------------------------------------------------------
 AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
 [
+  dnl For ACSM_RPATHFLAG
+  AC_REQUIRE([ACSM_SET_CXX_FLAGS])
+
   AC_ARG_VAR([KOKKOS_CXXFLAGS], [Extra C++ flags for compiling Kokkos sources])
 
   AC_ARG_WITH([kokkos],
@@ -49,7 +52,7 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
     [
       dnl Set defaults for any variables not provided by caller or auto-detect
       KOKKOS_CPPFLAGS="${KOKKOS_CPPFLAGS:--DACSM_KOKKOS_COMPILATION -I$KOKKOS_INCLUDE_DIR}"
-      KOKKOS_LDFLAGS="${KOKKOS_LDFLAGS:--L$KOKKOS_LIB_DIR}"
+      KOKKOS_LDFLAGS="${KOKKOS_LDFLAGS:--L$KOKKOS_LIB_DIR ${ACSM_RPATHFLAG}${KOKKOS_LIB_DIR}}"
       KOKKOS_LIBS="${KOKKOS_LIBS:--lkokkoscore}"
 
       AC_CHECK_FILE([$KOKKOS_INCLUDE_DIR/Kokkos_Core.hpp],
