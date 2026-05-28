@@ -189,7 +189,7 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
               acsm_save_CXXFLAGS="$CXXFLAGS"
 
               CXX="$KOKKOS_CXX"
-              CXXFLAGS="$CXXFLAGS -fopenmp"
+              CXXFLAGS="$CXXFLAGS $KOKKOS_CXXFLAGS -fopenmp"
               AC_LANG_PUSH([C++])
 
               AC_COMPILE_IFELSE([AC_LANG_PROGRAM([@%:@include <vector>],
