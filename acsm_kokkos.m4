@@ -136,6 +136,7 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
                       ADA89)            ax_cuda_sms="$ax_cuda_sms 89" ;;
                       HOPPER|HOPPER90)  ax_cuda_sms="$ax_cuda_sms 90" ;;
                       AMD_GFX*)         ;; dnl handled below in HIP section
+                      *)                AC_MSG_WARN([Unknown Kokkos Arch: $t]);;
                     esac
                   done
 
