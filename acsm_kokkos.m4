@@ -110,7 +110,7 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
                   dnl
 
                   dnl harvest defined arch macros from Kokkos config
-                  AC_MSG_CHECKING([for Kokkos defined architectures])
+                  AC_MSG_NOTICE([Parsing Kokkos defined architectures])
                   ax_kokkos_arch_lines=`$GREP '^[[[:space:]]]*#define[[:space:]]\{1,\}KOKKOS_ARCH_[A-Za-z0-9_][A-Za-z0-9_]*' "$KOKKOS_CFG" \
                     | $SED -n 's/.*KOKKOS_ARCH_\([[A-Za-z0-9_]][[A-Za-z0-9_]]*\).*/\1/p'`
                   AC_MSG_RESULT([$ax_kokkos_arch_lines])
