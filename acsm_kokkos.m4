@@ -115,14 +115,9 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
                     | $SED -n 's/.*KOKKOS_ARCH_\([[A-Za-z0-9_]][[A-Za-z0-9_]]*\).*/\1/p'`
                   AC_MSG_RESULT([$ax_kokkos_arch_lines])
 
-                  dnl Keep only GPU-ish tokens we know how to map
-                  ax_kokkos_arch_gpu=`printf "%s\n" "$ax_kokkos_arch_lines" \
-                    | "$GREP" '^\(KEPLER\(30\|32\|35\|37\)\{0,1\}\|MAXWELL\(50\|52\|53\)\{0,1\}\|PASCAL\(60\|61\)\{0,1\}\|VOLTA\(70\|72\)\{0,1\}\|  TURING75\|AMPERE\(80\|86\)\{0,1\}\|ADA89\|HOPPER\(90\)\{0,1\}\|AMD_GFX[0-9A-Za-z]\{1,\}\)$' \
-                    || true`
-
                   dnl Prefer numbered macros; if both generic and numbered exist, numbered will appear too.
                   ax_cuda_sms=
-                  for t in $ax_kokkos_arch_gpu; do
+                  for t in $ax_kokkos_arch_lines; do
                     case "$t" in
                       KEPLER30|KEPLER)  ax_cuda_sms="$ax_cuda_sms 30" ;;
                       KEPLER32)         ax_cuda_sms="$ax_cuda_sms 32" ;;
