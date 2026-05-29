@@ -212,22 +212,32 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
           dnl If KOKKOS_CXX differs from the main compiler, it may not be the MPI
           dnl wrapper and thus may need the wrapper's compile flags explicitly in
           dnl order to find mpi.h.  Query the primary CXX wrapper for compile-time
-          dnl flags and fall back to MPI_INCLUDES when probing is unavailable.
+	  dnl flags and fall back to MPI_INCLUDES and MPI_LDFLAGS when probing
+	  dnl is unavailable.
           KOKKOS_MPI_CPPFLAGS=""
+          KOKKOS_MPI_LDFLAGS=""
           AS_IF([test "x$enablempi" = "xyes" && test "x$KOKKOS_CXX" != "x$CXX"],
             [
-              AC_MSG_CHECKING([for MPI compile flags usable with KOKKOS_CXX])
+              AC_MSG_CHECKING([for MPI compile flags to use with KOKKOS_CXX])
 
               dnl Check for flags from OpenMPI mpicxx
               KOKKOS_MPI_CPPFLAGS=`$CXX -showme:compile 2>/dev/null`
+              KOKKOS_MPI_LDFLAGS=`$CXX -showme:link 2>/dev/null`
 
               dnl If we found no OpenMPI results, try MPICH arguments
               AS_IF([test "x$KOKKOS_MPI_CPPFLAGS" = "x"],
-                [KOKKOS_MPI_CPPFLAGS=`$CXX -cxx='' -compile_info 2>/dev/null`])
+                [KOKKOS_MPI_CPPFLAGS=`$CXX -cxx='' -compile_info 2>/dev/null`
+                 KOKKOS_MPI_LDFLAGS=`$CXX -cxx='' -link_info 2>/dev/null`
+                ])
 
-              dnl If we still have nothing, try Intel MPI arguments
+	      dnl If we still have nothing, try Intel MPI arguments.  The docs
+	      dnl say that these "learn how the underlying compiler is invoked,
+	      dnl without actually running it", so we shouldn't need to
+	      dnl actually create test.c etc.
               AS_IF([test "x$KOKKOS_MPI_CPPFLAGS" = "x"],
-                [KOKKOS_MPI_CPPFLAGS=`$CXX -show 2>/dev/null | sed 's/^[^ ]* //'`])
+                [KOKKOS_MPI_CPPFLAGS=`$CXX -show -c test.c 2>/dev/null | sed 's/^[^ ]* //'`
+                 KOKKOS_MPI_LDFLAGS=`$CXX -show -o a.out test.o 2>/dev/null | sed 's/^[^ ]* //'`
+                ])
 
               dnl Our MPI compiler might be reporting a mix of flags
               dnl we do and do not want.  We could try to retain
@@ -253,10 +263,18 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
               AS_IF([test "x$KOKKOS_MPI_CPPFLAGS" = "x"],
                 [KOKKOS_MPI_CPPFLAGS="$MPI_INCLUDES"])
 
+              AS_IF([test "x$KOKKOS_MPI_LDFLAGS" = "x"],
+                [KOKKOS_MPI_LDFLAGS="$MPI_LDFLAGS"])
+
               dnl Report what we finally do or do not have
               AS_IF([test "x$KOKKOS_MPI_CPPFLAGS" = "x"],
-                [AC_MSG_RESULT([not found])],
+                [AC_MSG_RESULT([none found])],
                 [AC_MSG_RESULT([$KOKKOS_MPI_CPPFLAGS])])
+
+              AC_MSG_CHECKING([for MPI link flags to use with KOKKOS_CXX])
+              AS_IF([test "x$KOKKOS_MPI_LDFLAGS" = "x"],
+                [AC_MSG_RESULT([not found])],
+                [AC_MSG_RESULT([$KOKKOS_MPI_LDFLAGS])])
             ])
 
           dnl Fail configure early if the chosen Kokkos compiler/flags/libs cannot
@@ -271,7 +289,7 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
           CXX="$KOKKOS_CXX"
           CPPFLAGS="$CPPFLAGS $KOKKOS_CPPFLAGS $KOKKOS_MPI_CPPFLAGS"
           CXXFLAGS="$CXXFLAGS $KOKKOS_CXXFLAGS"
-          LDFLAGS="$LDFLAGS $KOKKOS_LDFLAGS"
+          LDFLAGS="$LDFLAGS $KOKKOS_LDFLAGS $KOKKOS_MPI_LDFLAGS"
           LIBS="$LIBS $KOKKOS_LIBS"
           AC_LANG_PUSH([C++])
 
