@@ -110,19 +110,14 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
                   dnl
 
                   dnl harvest defined arch macros from Kokkos config
-                  AC_MSG_CHECKING([for Kokkos defined architectures])
+                  AC_MSG_NOTICE([Parsing Kokkos defined architectures])
                   ax_kokkos_arch_lines=`$GREP '^[[[:space:]]]*#define[[:space:]]\{1,\}KOKKOS_ARCH_[A-Za-z0-9_][A-Za-z0-9_]*' "$KOKKOS_CFG" \
                     | $SED -n 's/.*KOKKOS_ARCH_\([[A-Za-z0-9_]][[A-Za-z0-9_]]*\).*/\1/p'`
                   AC_MSG_RESULT([$ax_kokkos_arch_lines])
 
-                  dnl Keep only GPU-ish tokens we know how to map
-                  ax_kokkos_arch_gpu=`printf "%s\n" "$ax_kokkos_arch_lines" \
-                    | "$GREP" '^\(KEPLER\(30\|32\|35\|37\)\{0,1\}\|MAXWELL\(50\|52\|53\)\{0,1\}\|PASCAL\(60\|61\)\{0,1\}\|VOLTA\(70\|72\)\{0,1\}\|  TURING75\|AMPERE\(80\|86\)\{0,1\}\|ADA89\|HOPPER\(90\)\{0,1\}\|AMD_GFX[0-9A-Za-z]\{1,\}\)$' \
-                    || true`
-
                   dnl Prefer numbered macros; if both generic and numbered exist, numbered will appear too.
                   ax_cuda_sms=
-                  for t in $ax_kokkos_arch_gpu; do
+                  for t in $ax_kokkos_arch_lines; do
                     case "$t" in
                       KEPLER30|KEPLER)  ax_cuda_sms="$ax_cuda_sms 30" ;;
                       KEPLER32)         ax_cuda_sms="$ax_cuda_sms 32" ;;
@@ -140,7 +135,9 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
                       AMPERE86)         ax_cuda_sms="$ax_cuda_sms 86" ;;
                       ADA89)            ax_cuda_sms="$ax_cuda_sms 89" ;;
                       HOPPER|HOPPER90)  ax_cuda_sms="$ax_cuda_sms 90" ;;
+                      BLACKWELL|BLACKWELL100)  ax_cuda_sms="$ax_cuda_sms 100" ;;
                       AMD_GFX*)         ;; dnl handled below in HIP section
+                      *)                AC_MSG_WARN([Unknown Kokkos Arch: $t]);;
                     esac
                   done
 
@@ -215,22 +212,32 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
           dnl If KOKKOS_CXX differs from the main compiler, it may not be the MPI
           dnl wrapper and thus may need the wrapper's compile flags explicitly in
           dnl order to find mpi.h.  Query the primary CXX wrapper for compile-time
-          dnl flags and fall back to MPI_INCLUDES when probing is unavailable.
+	  dnl flags and fall back to MPI_INCLUDES and MPI_LDFLAGS when probing
+	  dnl is unavailable.
           KOKKOS_MPI_CPPFLAGS=""
+          KOKKOS_MPI_LDFLAGS=""
           AS_IF([test "x$enablempi" = "xyes" && test "x$KOKKOS_CXX" != "x$CXX"],
             [
-              AC_MSG_CHECKING([for MPI compile flags usable with KOKKOS_CXX])
+              AC_MSG_CHECKING([for MPI compile flags to use with KOKKOS_CXX])
 
               dnl Check for flags from OpenMPI mpicxx
               KOKKOS_MPI_CPPFLAGS=`$CXX -showme:compile 2>/dev/null`
+              KOKKOS_MPI_LDFLAGS=`$CXX -showme:link 2>/dev/null`
 
               dnl If we found no OpenMPI results, try MPICH arguments
               AS_IF([test "x$KOKKOS_MPI_CPPFLAGS" = "x"],
-                [KOKKOS_MPI_CPPFLAGS=`$CXX -cxx='' -compile_info 2>/dev/null`])
+                [KOKKOS_MPI_CPPFLAGS=`$CXX -cxx='' -compile_info 2>/dev/null`
+                 KOKKOS_MPI_LDFLAGS=`$CXX -cxx='' -link_info 2>/dev/null`
+                ])
 
-              dnl If we still have nothing, try Intel MPI arguments
+	      dnl If we still have nothing, try Intel MPI arguments.  The docs
+	      dnl say that these "learn how the underlying compiler is invoked,
+	      dnl without actually running it", so we shouldn't need to
+	      dnl actually create test.c etc.
               AS_IF([test "x$KOKKOS_MPI_CPPFLAGS" = "x"],
-                [KOKKOS_MPI_CPPFLAGS=`$CXX -show 2>/dev/null | sed 's/^[^ ]* //'`])
+                [KOKKOS_MPI_CPPFLAGS=`$CXX -show -c test.c 2>/dev/null | sed 's/^[^ ]* //'`
+                 KOKKOS_MPI_LDFLAGS=`$CXX -show -o a.out test.o 2>/dev/null | sed 's/^[^ ]* //'`
+                ])
 
               dnl Our MPI compiler might be reporting a mix of flags
               dnl we do and do not want.  We could try to retain
@@ -256,10 +263,18 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
               AS_IF([test "x$KOKKOS_MPI_CPPFLAGS" = "x"],
                 [KOKKOS_MPI_CPPFLAGS="$MPI_INCLUDES"])
 
+              AS_IF([test "x$KOKKOS_MPI_LDFLAGS" = "x"],
+                [KOKKOS_MPI_LDFLAGS="$MPI_LDFLAGS"])
+
               dnl Report what we finally do or do not have
               AS_IF([test "x$KOKKOS_MPI_CPPFLAGS" = "x"],
-                [AC_MSG_RESULT([not found])],
+                [AC_MSG_RESULT([none found])],
                 [AC_MSG_RESULT([$KOKKOS_MPI_CPPFLAGS])])
+
+              AC_MSG_CHECKING([for MPI link flags to use with KOKKOS_CXX])
+              AS_IF([test "x$KOKKOS_MPI_LDFLAGS" = "x"],
+                [AC_MSG_RESULT([not found])],
+                [AC_MSG_RESULT([$KOKKOS_MPI_LDFLAGS])])
             ])
 
           dnl Fail configure early if the chosen Kokkos compiler/flags/libs cannot
@@ -274,7 +289,7 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
           CXX="$KOKKOS_CXX"
           CPPFLAGS="$CPPFLAGS $KOKKOS_CPPFLAGS $KOKKOS_MPI_CPPFLAGS"
           CXXFLAGS="$CXXFLAGS $KOKKOS_CXXFLAGS"
-          LDFLAGS="$LDFLAGS $KOKKOS_LDFLAGS"
+          LDFLAGS="$LDFLAGS $KOKKOS_LDFLAGS $KOKKOS_MPI_LDFLAGS"
           LIBS="$LIBS $KOKKOS_LIBS"
           AC_LANG_PUSH([C++])
 
