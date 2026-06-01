@@ -61,6 +61,7 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
 
           AS_IF([test "x$PETSC_MPI" != x],
                 [
+                  AC_MSG_RESULT([<<< MPIEXEC was found in PETSc config >>>])
                 ],
                 [
                   AC_MSG_RESULT([<<< No MPIEXEC found in PETSc config >>>])
