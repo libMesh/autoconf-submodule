@@ -11,7 +11,10 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
 
   # Trump --enable-petsc with --disable-mpi
   AS_IF([test "x$enablempi" = xno],
-        [enablepetsc=no;enablepetsc_mpi=no])
+        [
+         AC_MSG_RESULT([<<< Disabling PETSc due to --disable-mpi >>>])
+         enablepetsc=no;enablepetsc_mpi=no
+        ])
 
   AC_ARG_VAR([PETSC_DIR],  [path to PETSc installation])
   AC_ARG_VAR([PETSC_ARCH], [PETSc build architecture])
@@ -35,7 +38,11 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
                         ])
                 ])
 
-          AS_IF([test x"$PETSC_DIR" = x], [enablepetsc=no;enablepetsc_mpi=no])
+          AS_IF([test x"$PETSC_DIR" = x],
+                [
+                 AC_MSG_RESULT([<<< Disabling PETSc due to unknown PETSC_DIR >>>])
+                 enablepetsc=no;enablepetsc_mpi=no
+                ])
         ])
 
   AS_IF([test "$enablepetsc" != no],
@@ -56,6 +63,7 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
                 [
                 ],
                 [
+                  AC_MSG_RESULT([<<< No MPIEXEC found in PETSc config >>>])
                   enablepetsc_mpi=no
                 ])
 
@@ -119,6 +127,7 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
           dnl SHELL=/bin/sh always
           AS_IF([test "$PREFIX_INSTALLED_PETSC" = "no"],
                 [
+                  AC_MSG_RESULT([<<< Querying PETSc data from ${PETSC_DIR} Makefile >>>])
                   PETSCLINKLIBS=`make -s -C ${PETSC_DIR} SHELL=/bin/sh getlinklibs`
                   PETSCINCLUDEDIRS=`make -s -C ${PETSC_DIR} SHELL=/bin/sh getincludedirs`
                   PETSC_CXX=`make -s -C $PETSC_DIR SHELL=/bin/sh getcxxcompiler`
@@ -136,6 +145,8 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
                   rm -f Makefile_config_petsc
                 ],
                 [
+                  AC_MSG_RESULT([<<< Scraping PETSc data from ${PETSC_VARS_FILE} >>>])
+
                   printf '%s\n' "include $PETSC_VARS_FILE" > Makefile_config_petsc
                   printf '%s\n' "getincludedirs:" >> Makefile_config_petsc
                   printf '\t%s' "echo " >> Makefile_config_petsc
@@ -172,11 +183,11 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
                   rm -f Makefile_config_petsc
                 ]) dnl scrape petsc cxx, includes, and libs
 
-          dnl Debugging: see what actually got set for PETSCINCLUDEDIRS
-          dnl echo ""
-          dnl echo "PETSCLINKLIBS=$PETSCLINKLIBS"
-          dnl echo "PETSCINCLUDEDIRS=$PETSCINCLUDEDIRS"
-          dnl echo ""
+          dnl See what actually got set for PETSCINCLUDEDIRS
+          AC_MSG_RESULT([<<< PETSc linklibs: $PETSCLINKLIBS >>>])
+          AC_MSG_RESULT([<<< PETSc includedirs: $PETSCINCLUDEDIRS>>>])
+          AC_MSG_RESULT([<<< PETSc CC includes: $PETSC_CC_INCLUDES>>>])
+          AC_MSG_RESULT([<<< PETSc FC includes: $PETSC_FC_INCLUDES>>>])
 
           # We sometimes need the full CC_INCLUDES to access a
           # PETSc-snooped MPI
