@@ -48,16 +48,19 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
   AS_IF([test "$enablepetsc" != no],
         [
           dnl Check for snoopable MPI
-          AS_IF([test -r ${PETSC_DIR}/bmake/${PETSC_ARCH}/petscconf], dnl 2.3.x
-                [PETSC_MPI=`grep MPIEXEC ${PETSC_DIR}/bmake/${PETSC_ARCH}/petscconf | grep -v mpiexec.uni`],
-                [test -r ${PETSC_DIR}/${PETSC_ARCH}/conf/petscvariables], dnl 3.0.x
-                [PETSC_MPI=`grep MPIEXEC ${PETSC_DIR}/${PETSC_ARCH}/conf/petscvariables | grep -v mpiexec.uni`],
-                [test -r ${PETSC_DIR}/conf/petscvariables], dnl 3.0.x
-                [PETSC_MPI=`grep MPIEXEC ${PETSC_DIR}/conf/petscvariables | grep -v mpiexec.uni`],
-                [test -r ${PETSC_DIR}/${PETSC_ARCH}/lib/petsc/conf/petscvariables], dnl 3.6.x
-                [PETSC_MPI=`grep MPIEXEC ${PETSC_DIR}/${PETSC_ARCH}/lib/petsc/conf/petscvariables | grep -v mpiexec.uni`],
-                [test -r ${PETSC_DIR}/lib/petsc/conf/petscvariables], dnl 3.6.x
-                [PETSC_MPI=`grep MPIEXEC ${PETSC_DIR}/lib/petsc/conf/petscvariables | grep -v mpiexec.uni`])
+          CONFS="${PETSC_DIR}/bmake/${PETSC_ARCH}/petscconf"                         # 2.3.x
+          CONFS="${CONFS} ${PETSC_DIR}/${PETSC_ARCH}/conf/petscvariables"            # 3.0.x
+          CONFS="${CONFS} ${PETSC_DIR}/conf/petscvariables"                          # 3.0.x
+          CONFS="${CONFS} ${PETSC_DIR}/${PETSC_ARCH}/lib/petsc/conf/petscvariables"  # 3.6.x
+          CONFS="${CONFS} ${PETSC_DIR}/lib/petsc/conf/petscvariables"                # 3.6.x
+          echo $CONFS
+          for CONF in $CONFS; do
+            AS_IF([test -r $CONF -a "x$PETSC_MPI" = x],
+                  [AC_MSG_CHECKING([PETSc config in ${CONF} for MPIEXEC])
+                   PETSC_MPI=`grep "MPIEXEC *=" ${CONF} | grep -v mpiexec.uni`
+                   AC_MSG_RESULT([${PETSC_MPI}])
+                   ])
+          done
 
           AS_IF([test "x$PETSC_MPI" != x],
                 [
