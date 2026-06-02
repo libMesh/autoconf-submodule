@@ -134,7 +134,8 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
                             ACSM_GXX_VERSION=intel_icc_v14.x],
                   [*13.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icc 13 >>>)
                             ACSM_GXX_VERSION=intel_icc_v13.x],
-                  [AC_MSG_ERROR(Unsupported Intel compiler detected)])
+                  [AC_MSG_RESULT(<<< C++ compiler is unknown but accepted Intel version >>>)
+                   ACSM_GXX_VERSION=intel-other])
                   compiler_brand_detected=yes
                 ])
 
@@ -143,6 +144,8 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
                 [
                   ACSM_GXX_VERSION_STRING="`($CXX -V 2>&1) | grep 'Version '`"
                   AS_CASE("$ACSM_GXX_VERSION_STRING",
+                  [*26.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icx 26 >>>)
+                            ACSM_GXX_VERSION=intel_icx_v26.x],
                   [*25.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icx 25 >>>)
                             ACSM_GXX_VERSION=intel_icx_v25.x],
                   [*24.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icx 24 >>>)
@@ -153,7 +156,8 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
                             ACSM_GXX_VERSION=intel_icx_v22.x],
                   [*21.*], [AC_MSG_RESULT(<<< C++ compiler is Intel(R) icx 21 >>>)
                             ACSM_GXX_VERSION=intel_icx_v21.x],
-                  [AC_MSG_ERROR(Unsupported Intel compiler detected)])
+                  [AC_MSG_RESULT(<<< C++ compiler is unknown but accepted Intel version >>>)
+                   ACSM_GXX_VERSION=intel-other])
                   compiler_brand_detected=yes
                 ])
         ])
