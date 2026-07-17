@@ -245,6 +245,7 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
 #
 # ACSM_ASSEMBLY_FLAGS  : flag(s) to enable assembly language output
 # ACSM_FPE_SAFETY_FLAGS: flag(s) to disable FPE-emitting optimizations
+# ACSM_IEEE754_FLAGS   : flag(s) to disable IEEE754-violating optimizations
 # ACSM_NODEPRECATEDFLAG: flag(s) to turn off deprecated code warnings
 # ACSM_OPROFILE_FLAGS  : flag(s) to enable profiling with oprof/perf
 # ACSM_PARANOID_FLAGS  : flags to turn on many more compiler warnings
@@ -385,6 +386,9 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
           ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -O2 -felide-constructors -g -pedantic -W -Wall -Wextra -Wno-long-long -Wunused"
           ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -Wpointer-arith -Wformat -Wparentheses -Wuninitialized -fstrict-aliasing -Woverloaded-virtual -Wdisabled-optimization"
           ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -O0 -felide-constructors -g -pedantic -W -Wall -Wextra -Wno-long-long -Wunused -Wpointer-arith -Wformat -Wparentheses -Woverloaded-virtual"
+
+          ACSM_IEEE754_FLAGS="-fno-unsafe-math-optimizations -fexcess-precision=standard -ffp-contract=off"
+
           ACSM_NODEPRECATEDFLAG="-Wno-deprecated"
 
           dnl this is the default on current gcc but let's be safe
@@ -440,6 +444,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                           ACSM_CXXFLAGS_OPT="-O3 -qmaxmem=-1 -w -qansialias -Q=10 -qrtti=all -qstaticinline"
                           ACSM_CXXFLAGS_DBG="-qmaxmem=-1 -qansialias -qrtti=all -g -qstaticinline"
                           ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DBG"
+                          ACSM_IEEE754_FLAGS="" # FIXME - not sure here
                           ACSM_NODEPRECATEDFLAG=""
                           ACSM_CFLAGS_OPT="-O3 -qmaxmem=-1 -w -qansialias -Q=10"
                           ACSM_CFLAGS_DBG="-qansialias -g"
@@ -448,6 +453,8 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
 
             dnl All Intel ICC/ECC flavors
             [intel_*], [
+                          ACSM_IEEE754_FLAGS="" # FIXME - not sure here
+
                           dnl Intel understands the gcc-like no-deprecated flag
                           ACSM_NODEPRECATEDFLAG="-Wno-deprecated"
 
@@ -499,6 +506,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                     ACSM_CFLAGS_DBG="$ACSM_CFLAGS_DBG -w1 -g -wd266 -wd1572 -wd488 -wd161"
                                     ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -O3 -unroll -w0 -ftz"
                                     ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DBG"
+                                    ACSM_IEEE754_FLAGS="-fp-model precise -no-fma"
                                   ],
                                   [intel_icx_*],
                                   [
@@ -509,6 +517,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                     ACSM_CFLAGS_DBG="$ACSM_CFLAGS_DBG -O0 -g"
                                     ACSM_CFLAGS_OPT="$ACSM_CFLAGS_OPT -O3"
                                     ACSM_CFLAGS_DEVEL="$ACSM_CFLAGS_DEVEL -O2 -g"
+                                    ACSM_IEEE754_FLAGS="-fp-model=precise -ffp-contract=off"
                                   ],
                                   [AC_MSG_RESULT(Unknown Intel compiler "$ACSM_GXX_VERSION")])
                           dnl icx >= 24.x accepts -fopenmp but prefers -qopenmp, issuing a warning
@@ -547,6 +556,8 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                 ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -O2 --display_error_number -g -pedantic -Wno-long-long -Wunused -Wuninitialized --diag_suppress=11,111,177,445,1676"
                                 ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O2 --display_error_number --diag_suppress=11,111,177,445,1676"
 
+                                ACSM_IEEE754_FLAGS="-fp-model=precise -ffp-contract=off -Kieee"
+
                                 ACSM_NODEPRECATEDFLAG="-Wno-deprecated-declarations"
 
                                 dnl Having to include -Mnovect is horrifying, but -Kieee alone still
@@ -570,6 +581,8 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                 ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O2 --no_using_std -fast -Minform=severe"
                                 ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DBG"
 
+                                ACSM_IEEE754_FLAGS="" # FIXME - maybe "-Mnofpapprox -Mnofma -Kieee"?
+
                                 dnl PG C++ definitely doesnt understand -Wno-deprecated...
                                 ACSM_NODEPRECATEDFLAG=""
 
@@ -589,6 +602,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                          ACSM_CXXFLAGS_DBG="-h conform,one_instantiation_per_object,instantiate=used,noimplicitinclude -G n"
                          ACSM_CXXFLAGS_OPT="-h conform,one_instantiation_per_object,instantiate=used,noimplicitinclude -G n"
                          ACSM_CXXFLAGS_DEVEL="-h conform,one_instantiation_per_object,instantiate=used,noimplicitinclude -G n"
+                         ACSM_IEEE754_FLAGS="" # FIXME - not sure here
                          ACSM_NODEPRECATEDFLAG=""
                          ACSM_CFLAGS_DBG="-G n"
                          ACSM_CFLAGS_OPT="-G n"
@@ -603,6 +617,9 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                        dnl dbg flags are added on two lines since there are so many
                        ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -O0 -felide-constructors -g -pedantic -W -Wall -Wextra -Wno-long-long"
                        ACSM_CXXFLAGS_DBG="$ACSM_CXXFLAGS_DBG -Wunused-parameter -Wunused -Wpointer-arith -Wformat -Wparentheses -Qunused-arguments -Woverloaded-virtual -fno-limit-debug-info"
+
+                       ACSM_IEEE754_FLAGS="-fno-unsafe-math-optimizations -fexcess-precision=standard -ffp-contract=off"
+
                        ACSM_NODEPRECATEDFLAG="-Wno-deprecated"
 
                        dnl -ftrapping-math is only supported with
@@ -675,6 +692,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
               ACSM_CXXFLAGS_DBG="$CXXFLAGS"
               ACSM_CXXFLAGS_OPT="$CXXFLAGS"
               ACSM_CXXFLAGS_DEVEL="$CXXFLAGS"
+              ACSM_IEEE754_FLAGS=""
               ACSM_NODEPRECATEDFLAG=""
 
               ACSM_CFLAGS_DBG="$CFLAGS"
