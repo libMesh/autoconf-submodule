@@ -391,7 +391,8 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
           ACSM_IEEE754_FLAGS="-fno-unsafe-math-optimizations -ffp-contract=off"
 
           # Older gcc only supported disabling x87 rounding in C, not C++
-          AS_IF([test "x$ACSM_GXX_VERSION" != "xgcc11" &&
+          AS_IF([test "x$ACSM_GXX_VERSION" != "xgcc12" &&
+                 test "x$ACSM_GXX_VERSION" != "xgcc11" &&
                  test "x$ACSM_GXX_VERSION" != "xgcc10" &&
                  test "x$ACSM_GXX_VERSION" != "xgcc9" &&
                  test "x$ACSM_GXX_VERSION" != "xgcc8" &&
