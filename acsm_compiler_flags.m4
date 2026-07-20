@@ -26,6 +26,16 @@ AC_DEFUN([ACSM_DETERMINE_CXX_BRAND],
           ACSM_GXX_VERSION_STRING=`($CXX -v 2>&1) | grep "gcc version"`
 
           AS_CASE("$ACSM_GXX_VERSION_STRING",
+                  [*gcc\ version\ 16.*], [AC_MSG_RESULT(<<< C++ compiler is gcc-16.x >>>)
+                                         ACSM_GXX_VERSION=gcc16],
+                  [*gcc\ version\ 15.*], [AC_MSG_RESULT(<<< C++ compiler is gcc-15.x >>>)
+                                         ACSM_GXX_VERSION=gcc15],
+                  [*gcc\ version\ 14.*], [AC_MSG_RESULT(<<< C++ compiler is gcc-14.x >>>)
+                                         ACSM_GXX_VERSION=gcc14],
+                  [*gcc\ version\ 13.*], [AC_MSG_RESULT(<<< C++ compiler is gcc-13.x >>>)
+                                         ACSM_GXX_VERSION=gcc13],
+                  [*gcc\ version\ 12.*], [AC_MSG_RESULT(<<< C++ compiler is gcc-12.x >>>)
+                                         ACSM_GXX_VERSION=gcc12],
                   [*gcc\ version\ 11.*], [AC_MSG_RESULT(<<< C++ compiler is gcc-11.x >>>)
                                          ACSM_GXX_VERSION=gcc11],
                   [*gcc\ version\ 10.*], [AC_MSG_RESULT(<<< C++ compiler is gcc-10.x >>>)
