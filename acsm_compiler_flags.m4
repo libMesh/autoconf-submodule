@@ -584,7 +584,7 @@ AC_DEFUN([ACSM_SET_CXX_FLAGS],
                                 ACSM_CXXFLAGS_DEVEL="$ACSM_CXXFLAGS_DEVEL -O2 --display_error_number -g -pedantic -Wno-long-long -Wunused -Wuninitialized --diag_suppress=11,111,177,445,1676"
                                 ACSM_CXXFLAGS_OPT="$ACSM_CXXFLAGS_OPT -O2 --display_error_number --diag_suppress=11,111,177,445,1676"
 
-                                ACSM_IEEE754_FLAGS="-fp-model=precise -ffp-contract=off -Kieee"
+                                ACSM_IEEE754_FLAGS="-Mnofma -Kieee"
 
                                 ACSM_NODEPRECATEDFLAG="-Wno-deprecated-declarations"
 
