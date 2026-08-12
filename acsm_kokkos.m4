@@ -59,8 +59,6 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
       AC_CHECK_FILE([$KOKKOS_INCLUDE_DIR/Kokkos_Core.hpp],
         [
           enablekokkos=yes
-          libmesh_optional_INCLUDES="$libmesh_optional_INCLUDES -I$KOKKOS_INCLUDE_DIR"
-          libmesh_optional_LIBS="$libmesh_optional_LIBS -L$KOKKOS_LIB_DIR -lkokkoscore"
 
           dnl Only auto-detect if KOKKOS_CXX was not pre-set by the caller
           AS_IF([test "x$KOKKOS_CXX" = "x"],
