@@ -51,15 +51,14 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
   AS_IF([test "x$KOKKOS_INCLUDE_DIR" != "xno/include" -a "x$KOKKOS_LIB_DIR" != "xno/lib"],
     [
       dnl Set defaults for any variables not provided by caller or auto-detect
-      KOKKOS_CPPFLAGS="${KOKKOS_CPPFLAGS:--DACSM_KOKKOS_COMPILATION -I$KOKKOS_INCLUDE_DIR}"
+      KOKKOS_INCLUDES="-I$KOKKOS_INCLUDE_DIR"
+      KOKKOS_CPPFLAGS="${KOKKOS_CPPFLAGS:--DACSM_KOKKOS_COMPILATION}"
       KOKKOS_LDFLAGS="${KOKKOS_LDFLAGS:--L$KOKKOS_LIB_DIR ${ACSM_RPATHFLAG}${KOKKOS_LIB_DIR}}"
       KOKKOS_LIBS="${KOKKOS_LIBS:--lkokkoscore}"
 
       AC_CHECK_FILE([$KOKKOS_INCLUDE_DIR/Kokkos_Core.hpp],
         [
           enablekokkos=yes
-          libmesh_optional_INCLUDES="$libmesh_optional_INCLUDES -I$KOKKOS_INCLUDE_DIR"
-          libmesh_optional_LIBS="$libmesh_optional_LIBS -L$KOKKOS_LIB_DIR -lkokkoscore"
 
           dnl Only auto-detect if KOKKOS_CXX was not pre-set by the caller
           AS_IF([test "x$KOKKOS_CXX" = "x"],
@@ -102,7 +101,7 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
                   AS_IF([test "x$NVCC" = "xno"],
                     [AC_MSG_ERROR([nvcc not found but Kokkos CUDA backend requested])])
                   KOKKOS_CXX="$NVCC"
-                  KOKKOS_CXXFLAGS="--forward-unknown-to-host-compiler -x cu $KOKKOS_CXXFLAGS"
+                  KOKKOS_CXXFLAGS="--forward-unknown-to-host-compiler -x cu --extended-lambda --expt-relaxed-constexpr -ccbin $CXX $KOKKOS_CXXFLAGS"
                   KOKKOS_LDFLAGS="--forward-unknown-to-host-compiler $KOKKOS_LDFLAGS"
 
                   dnl
@@ -361,11 +360,13 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
 
   AC_SUBST([KOKKOS_BACKEND])
   AC_SUBST([KOKKOS_CXX])
+  AC_SUBST([KOKKOS_INCLUDES])
   AC_SUBST([KOKKOS_CPPFLAGS])
   AC_SUBST([KOKKOS_CXXFLAGS])
   AC_SUBST([KOKKOS_LDFLAGS])
   AC_SUBST([KOKKOS_LIBS])
   AC_SUBST([KOKKOS_MPI_CPPFLAGS])
+  AC_SUBST([KOKKOS_MPI_LDFLAGS])
   AM_CONDITIONAL(ACSM_ENABLE_KOKKOS, test x$enablekokkos = xyes)
 ])
 
