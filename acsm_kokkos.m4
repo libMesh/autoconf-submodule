@@ -102,7 +102,6 @@ AC_DEFUN([ACSM_CONFIGURE_KOKKOS],
                     [AC_MSG_ERROR([nvcc not found but Kokkos CUDA backend requested])])
                   KOKKOS_CXX="$NVCC"
                   KOKKOS_CXXFLAGS="--forward-unknown-to-host-compiler -x cu --extended-lambda --expt-relaxed-constexpr -ccbin $CXX $KOKKOS_CXXFLAGS"
-                  KOKKOS_LDFLAGS="--forward-unknown-to-host-compiler $KOKKOS_LDFLAGS"
 
                   dnl
                   dnl credit to ChatGPT for the ensuing parsing of arch's from kokkos config
