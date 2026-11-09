@@ -187,15 +187,38 @@ AC_DEFUN([ACSM_SCRAPE_PETSC_CONFIGURE],
                   rm -f Makefile_config_petsc
                 ]) dnl scrape petsc cxx, includes, and libs
 
+          dnl PETSc stores the preprocessor flags given to its configure
+          dnl (CPPFLAGS, CXXPPFLAGS, CUDAPPFLAGS, HIPPPFLAGS, SYCLPPFLAGS) as
+          dnl *PP_FLAGS, separately from PETSC_CC_INCLUDES. Headers installed
+          dnl by PETSc may depend on directories given only there, so keep
+          dnl their include directives. The other flags (e.g. -DNDEBUG) are
+          dnl PETSc's build settings, not requirements of its headers.
+          printf '%s\n' "include $PETSC_VARS_FILE" > Makefile_config_petsc
+          printf '%s\n' "getppflags:" >> Makefile_config_petsc
+          printf '\t%s\n' "echo \$(CPP_FLAGS) \$(CXXPP_FLAGS) \$(CUDAPP_FLAGS) \$(HIPPP_FLAGS) \$(SYCLPP_FLAGS)" >> Makefile_config_petsc
+          PETSC_PP_FLAGS=`make -s -f Makefile_config_petsc SHELL=/bin/sh getppflags`
+          rm -f Makefile_config_petsc
+          PETSC_PP_INCLUDES=""
+          acsm_petsc_prev_flag=""
+          for acsm_petsc_flag in $PETSC_PP_FLAGS; do
+            dnl Handle both the joined (-I/dir) and separated (-I /dir) forms
+            AS_CASE([$acsm_petsc_prev_flag],
+                    [-I|-isystem], [PETSC_PP_INCLUDES="$PETSC_PP_INCLUDES $acsm_petsc_prev_flag $acsm_petsc_flag"],
+                    [AS_CASE([$acsm_petsc_flag],
+                             [-I?*|-isystem?*], [PETSC_PP_INCLUDES="$PETSC_PP_INCLUDES $acsm_petsc_flag"])])
+            acsm_petsc_prev_flag="$acsm_petsc_flag"
+          done
+
           dnl See what actually got set for PETSCINCLUDEDIRS
           AC_MSG_RESULT([<<< PETSc linklibs: $PETSCLINKLIBS >>>])
           AC_MSG_RESULT([<<< PETSc includedirs: $PETSCINCLUDEDIRS>>>])
           AC_MSG_RESULT([<<< PETSc CC includes: $PETSC_CC_INCLUDES>>>])
           AC_MSG_RESULT([<<< PETSc FC includes: $PETSC_FC_INCLUDES>>>])
+          AC_MSG_RESULT([<<< PETSc preprocessor flag includes: $PETSC_PP_INCLUDES>>>])
 
           # We sometimes need the full CC_INCLUDES to access a
           # PETSc-snooped MPI
-          PETSCINCLUDEDIRS="$PETSCINCLUDEDIRS $PETSC_CC_INCLUDES"
+          PETSCINCLUDEDIRS="$PETSCINCLUDEDIRS $PETSC_CC_INCLUDES $PETSC_PP_INCLUDES"
 
     ]) dnl AS_IF(enable_petsc)
 
